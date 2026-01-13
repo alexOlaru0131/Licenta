@@ -31,7 +31,7 @@ public class MPC : MonoBehaviour
 
     private bool CheckTaskValid(State state)
     {
-        foreach(Vector3 position in agentScript.wallBoxPositions)
+        foreach(Vector3 position in agentScript.gb.wallBoxPositions)
         {
             if (state.robotX >= position[0] &&
                 state.robotX <= position[0] + 3 &&

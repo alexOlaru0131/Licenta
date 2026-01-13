@@ -54,6 +54,8 @@
     <Compile Include="Assets/Scripts/AgentScript.cs" />
     <Compile Include="Assets/Air Resistance 2.0/Scripts/AirResistance.cs" />
     <Compile Include="Assets/TutorialInfo/Scripts/Readme.cs" />
+    <Compile Include="Assets/Scripts/GenerateTrack.cs" />
+    <Compile Include="Assets/Scripts/GenerateBoxes.cs" />
     <Compile Include="Assets/Scripts/State.cs" />
   </ItemGroup>
   <ItemGroup>

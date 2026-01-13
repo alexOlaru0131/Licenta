@@ -18,6 +18,11 @@ public class AgentScript : Agent
     [Header("MPC Script")]
     public MPC mpc;
 
+    [Header("Generate boxes script")]
+    [SerializeField]
+    public GenerateBoxes gb;
+    private GenerateBoxes gen;
+
     [Header("Environment")]
     public Transform environmentParent;
 
@@ -53,14 +58,6 @@ public class AgentScript : Agent
     private float[] distances = new float[5];
     private float[] angles = new float[5];
 
-    [Header("Walls")]
-    [SerializeField] public GameObject wallBox;
-    private Transform wallBoxTransform;
-    private List<GameObject> wallBoxList = new List<GameObject>();
-    private List<Collider> wallBoxColList = new List<Collider>();
-    [HideInInspector]
-    public List<Vector3> wallBoxPositions = new List<Vector3>();
-
     [Header("Floor")]
     public BoxCollider floor;
     public PhysicsMaterial floorMaterial;
@@ -81,10 +78,6 @@ public class AgentScript : Agent
 
     private void Update()
     {
-        Vector3 floorUpperLimits = floor.bounds.max;
-        Vector3 floorLowerLimits = floor.bounds.min;
-        Vector3 floorPosition = floor.transform.position;
-
         System.Random rnd = new System.Random();
         Vector3 agentPosition = rigid.position;
 
@@ -127,6 +120,13 @@ public class AgentScript : Agent
         {
             EndEpisode();
         }
+    }
+    void Awake()
+    {
+        gen = gb.GetComponent<GenerateBoxes>();
+        if (gen == null)
+            gen = gb.AddComponent<GenerateBoxes>();
+        gen.Init(floor, targetPositions, rigid);
     }
 
     public override void OnActionReceived(ActionBuffers actions)
@@ -326,17 +326,17 @@ public class AgentScript : Agent
 
             floor.material = floorMaterial;
 
-            foreach (var box in wallBoxList)
+            foreach (var box in gb.wallBoxList)
             {
                 Destroy(box);
             }
-            wallBoxList.Clear();
+            gb.wallBoxList.Clear();
 
-            foreach(var col in wallBoxColList)
+            foreach(var col in gb.wallBoxColList)
             {
                 Destroy(col);
             }
-            wallBoxColList.Clear();
+            gb.wallBoxColList.Clear();
 
             foreach(var col in targetsColliders)
             {
@@ -447,67 +447,13 @@ public class AgentScript : Agent
             target5Position = randomPoint5;
             targetPositions.Add(randomPoint5);
 
-            // --------------------- WALLBOX
-            wallBoxTransform = wallBox.GetComponent<Transform>();
-
-            Vector3 startPos = new Vector3(
-                                                        (float)(floorLowerLimits[0] + 1.5),
-                                                        floorLowerLimits[1] + 1,
-                                                        (float)(floorLowerLimits[2] + 1.5)
-                                                    );
-
-            int numberOfBoxesZ = (int)(floor.bounds.extents[2] * 2 / 3);
-            int numberOfBoxesX = (int)(floor.bounds.extents[0] * 2 / 3);
-            int[,] boxesMap = new int[numberOfBoxesX+1, numberOfBoxesZ+1];
-            int boxesLimits = rnd.Next(2, 6);
-            for (int i = 0; i <= numberOfBoxesX; i++)
-            {
-                for (int j = 0; j <= numberOfBoxesZ; j++)
-                {
-                    bool canPlace = true;
-                    Vector3 expectedPosition = new Vector3(startPos[0] + 3 * i,
-                                              startPos[1],
-                                              startPos[2] + 3 * j
-                                              );
-
-                    foreach (Vector3 targetPos in targetPositions)
-                    {
-                        if (System.Math.Abs(expectedPosition[0] + 1.5 - targetPos[0]) < 6 + boxesLimits &&
-                            System.Math.Abs(expectedPosition[0] - 1.5 - targetPos[0]) < 6 + boxesLimits &&
-                            System.Math.Abs(expectedPosition[2] + 1.5 - targetPos[2]) < 6 + boxesLimits &&
-                            System.Math.Abs(expectedPosition[2] - 1.5 - targetPos[2]) < 6 + boxesLimits)
-                        {
-                            canPlace = false;
-                            boxesMap[i, j] = 0;
-                        }
-                        if (System.Math.Abs(expectedPosition[0] + 1.5 - rigid.transform.position[0]) < 10.5 &&
-                            System.Math.Abs(expectedPosition[2] + 1.5 - rigid.transform.position[2]) < 10.5)
-                        {
-                            canPlace = false;
-                            boxesMap[i, j] = 0;
-                        }
-                    }
-
-                    if (canPlace)
-                    {
-                        GameObject wallBoxTemp = Instantiate(wallBox);
-                        wallBoxTemp.transform.position = expectedPosition;
-                        Collider wallBoxCol = wallBoxTemp.GetComponent<Collider>();
-                        wallBoxCol.name = "wallbox";
-                        wallBoxCol.enabled = true;
-                        wallBoxList.Add(wallBoxTemp);
-                        wallBoxColList.Add(wallBoxCol);
-                        boxesMap[i, j] = 1;
-                        wallBoxPositions.Add(expectedPosition);
-                    }
-                }
-            }
-
             foreach (var target in targets){
                 target.transform.SetParent(environmentParent, false);
                 target.transform.localScale = new Vector3(2, 0.2f, 2);
             }
         }
+
+        gen.GenerateBoxesFcn();
 
         // --------------------- RESETS FOR TARGET REACHED STATE
         gotTarget1 = false;

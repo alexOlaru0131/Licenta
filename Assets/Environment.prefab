@@ -3147,7 +3147,7 @@ GameObject:
   - component: {fileID: 6357716142111088425}
   - component: {fileID: 3827754452464034000}
   m_Layer: 0
-  m_Name: Walls
+  m_Name: wallBox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3163,7 +3163,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 28.9, y: -55, z: -5.76579}
-  m_LocalScale: {x: 3, y: 3, z: 3}
+  m_LocalScale: {x: 1, y: 3, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3270702220500117266}
@@ -4100,6 +4100,7 @@ GameObject:
   - component: {fileID: 3270702220500117266}
   - component: {fileID: 1704585865969957000}
   - component: {fileID: 9207832429460365196}
+  - component: {fileID: 4605228404962459848}
   m_Layer: 0
   m_Name: Environment
   m_TagString: Untagged
@@ -4164,6 +4165,22 @@ MonoBehaviour:
   LogFilepath: 
   SleepAfterLogLineMilliseconds: 100
   AutoEnableRunInBackground: 1
+--- !u!114 &4605228404962459848
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3843208354080679025}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 537471cb34833272bb61436bfedb58e3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GenerateBoxes
+  wallBox: {fileID: 3187209042626010989}
+  wallBoxList: []
+  wallBoxColList: []
+  wallBoxPositions: []
 --- !u!1 &3845449805003624052
 GameObject:
   m_ObjectHideFlags: 0
@@ -6083,7 +6100,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 11.059999, z: 0}
-  m_LocalScale: {x: 0.7, y: 0.7, z: 0.7}
+  m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 4093513023926625255}
@@ -6166,6 +6183,7 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   mpc: {fileID: 6184685588205753100}
+  gb: {fileID: 4605228404962459848}
   environmentParent: {fileID: 0}
   rigid: {fileID: 4965497976259641221}
   frontRightCol: {fileID: 7770483680842694365}
@@ -6182,8 +6200,6 @@ MonoBehaviour:
   target3: {fileID: 9097201200039792665}
   target4: {fileID: 4751240383425649414}
   target5: {fileID: 8895259129904584942}
-  wallBox: {fileID: 3187209042626010989}
-  wallBoxPositions: []
   floor: {fileID: 5437205168030500263}
   floorMaterial: {fileID: 13400000, guid: 43de3455bd37c404e9c62bb5e0ba4339, type: 2}
   lowerCollider: {fileID: 9044499707915534690}

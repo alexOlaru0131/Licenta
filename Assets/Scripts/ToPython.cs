@@ -8,7 +8,7 @@ public class ToPython : MonoBehaviour
     int width = 240;
     int height = 180;
     float minRange = 0.1f;
-    float maxRange = 40.0f;
+    float maxRange = 4.0f;
     float refreshRate = 60.0f;
 
     LayerMask layerMask = Physics.AllLayers;
@@ -114,7 +114,7 @@ public class ToPython : MonoBehaviour
                     value += (float)noise;
                 }
 
-                Debug.DrawRay(ray.origin, ray.direction * maxRange, Color.red, 0.1f);
+                // Debug.DrawRay(ray.origin, ray.direction * maxRange, Color.red, 0.1f);
 
                 distances[i,j] = value;
             }
