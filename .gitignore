@@ -1,0 +1,23 @@
+
+# Unity (generated)
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Mm]emoryCaptures/
+UserSettings/
+
+# Unity Package Cache (generated)
+Library/PackageCache/
+Library/ArtifactDB*
+
+# Python virtual env
+python-side-env/
+.venv/
+venv/
+
+# Large docs / binaries (optional)
+*.pdf
+
