@@ -4101,6 +4101,7 @@ GameObject:
   - component: {fileID: 1704585865969957000}
   - component: {fileID: 9207832429460365196}
   - component: {fileID: 4605228404962459848}
+  - component: {fileID: 9181884125820192243}
   m_Layer: 0
   m_Name: Environment
   m_TagString: Untagged
@@ -4181,6 +4182,19 @@ MonoBehaviour:
   wallBoxList: []
   wallBoxColList: []
   wallBoxPositions: []
+--- !u!114 &9181884125820192243
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3843208354080679025}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5955dbf6e65fc0a5a8169f5bc8814093, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GenerateTrack
+  pathPoints: []
 --- !u!1 &3845449805003624052
 GameObject:
   m_ObjectHideFlags: 0
@@ -6184,6 +6198,7 @@ MonoBehaviour:
   MaxStep: 0
   mpc: {fileID: 6184685588205753100}
   gb: {fileID: 4605228404962459848}
+  gt: {fileID: 9181884125820192243}
   environmentParent: {fileID: 0}
   rigid: {fileID: 4965497976259641221}
   frontRightCol: {fileID: 7770483680842694365}

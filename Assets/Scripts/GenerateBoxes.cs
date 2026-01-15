@@ -16,14 +16,14 @@ public class GenerateBoxes : MonoBehaviour
     public List<Vector3> wallBoxPositions = new List<Vector3>();
 
     // private members
-    private List<Vector3> targetPositions;
+    private List<Vector3> pathPoints;
     private Transform wallBoxTransform;
     private Rigidbody rigid;
     private BoxCollider floor;
-    public void Init(BoxCollider floor, List<Vector3> targetPositions, Rigidbody rigid)
+    public void Init(BoxCollider floor, List<Vector3> pathPoints, Rigidbody rigid)
     {
         this.floor = floor;
-        this.targetPositions = targetPositions;
+        this.pathPoints = pathPoints;
         this.rigid = rigid;
     }
 
@@ -50,15 +50,14 @@ public class GenerateBoxes : MonoBehaviour
         wallBoxTransform = wallBox.GetComponent<Transform>();
 
         Vector3 startPos = new Vector3(
-                                                    (float)(floorLowerLimits[0]),
-                                                    floorLowerLimits[1] + 1,
-                                                    (float)(floorLowerLimits[2])
-                                                );
+                                            (float)(floorLowerLimits[0]),
+                                            floorLowerLimits[1] + 1,
+                                            (float)(floorLowerLimits[2])
+                                        );
 
         int numberOfBoxesZ = (int)(floor.bounds.extents[2] * 2 );
         int numberOfBoxesX = (int)(floor.bounds.extents[0] * 2 );
         int[,] boxesMap = new int[numberOfBoxesX+1, numberOfBoxesZ+1];
-        int boxesLimits = rnd.Next(2, 6);
         for (int i = 0; i <= numberOfBoxesX; i++)
         {
             for (int j = 0; j <= numberOfBoxesZ; j++)
@@ -69,21 +68,14 @@ public class GenerateBoxes : MonoBehaviour
                                             startPos[2] + j
                                             );
 
-                foreach (Vector3 targetPos in targetPositions)
+                foreach (Vector3 targetPos in pathPoints)
                 {
-                    if (System.Math.Abs(expectedPosition[0] - targetPos[0]) < 3 + boxesLimits &&
-                        System.Math.Abs(expectedPosition[0] - targetPos[0]) < 3 + boxesLimits &&
-                        System.Math.Abs(expectedPosition[2] - targetPos[2]) < 3 + boxesLimits &&
-                        System.Math.Abs(expectedPosition[2] - targetPos[2]) < 3 + boxesLimits)
+                    if (System.Math.Abs(expectedPosition[0] - targetPos[0]) < 2.5 &
+                        System.Math.Abs(expectedPosition[0] - targetPos[0]) < 2.5 &&
+                        System.Math.Abs(expectedPosition[2] - targetPos[2]) < 2.5 &&
+                        System.Math.Abs(expectedPosition[2] - targetPos[2]) < 2.5)
                     {
                         canPlace = false;
-                        boxesMap[i, j] = 0;
-                    }
-                    if (System.Math.Abs(expectedPosition[0] - rigid.transform.position[0]) < 3 &&
-                        System.Math.Abs(expectedPosition[2] - rigid.transform.position[2]) < 3)
-                    {
-                        canPlace = false;
-                        boxesMap[i, j] = 0;
                     }
                 }
 

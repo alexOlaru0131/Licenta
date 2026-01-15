@@ -15,6 +15,7 @@ using static UnityEngine.GraphicsBuffer;
 
 public class AgentScript : Agent
 {
+    // scripts
     [Header("MPC Script")]
     public MPC mpc;
 
@@ -22,6 +23,12 @@ public class AgentScript : Agent
     [SerializeField]
     public GenerateBoxes gb;
     private GenerateBoxes gen;
+
+    [Header("Generate track script")]
+    [SerializeField]
+    public GenerateTrack gt;
+    private GenerateTrack genTr;
+
 
     [Header("Environment")]
     public Transform environmentParent;
@@ -123,10 +130,7 @@ public class AgentScript : Agent
     }
     void Awake()
     {
-        gen = gb.GetComponent<GenerateBoxes>();
-        if (gen == null)
-            gen = gb.AddComponent<GenerateBoxes>();
-        gen.Init(floor, targetPositions, rigid);
+
     }
 
     public override void OnActionReceived(ActionBuffers actions)
@@ -225,7 +229,7 @@ public class AgentScript : Agent
         backLeftCol.GetWorldPose(out Vector3 pos4, out Quaternion rot4);
         backLeftWheel.transform.position = pos4;
         backLeftWheel.transform.rotation = rot4;
-
+        
         State state = new State
         {
             pos1x = target1Position[0],
@@ -352,64 +356,26 @@ public class AgentScript : Agent
             Destroy(target5);
 
             targetPositions.Clear();
-
-            // --------------------- POINT 1
             Vector3 randomPoint1 = new Vector3(
                                                     floorPosition[0],
                                                     floorUpperLimits[1],
                                                     floorPosition[2] - 15
                                                  );
-            target1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            BoxCollider target1Collider = target1.GetComponent<BoxCollider>();
-            target1Collider.isTrigger = true;
-            target1Collider.name = "Target1Collider";
-            target1Collider.enabled = true;
-            target1Collider.size = new Vector3(target1Collider.size.x, 5f, target1Collider.size.z);
-            target1.transform.position = randomPoint1;
-            targets.Add(target1);
-            targetsColliders.Add(target1Collider);
-            target1Position = randomPoint1;
             targetPositions.Add(randomPoint1);
-
-            // --------------------- POINT 2
             int rpx2 = rnd.Next((int)randomPoint1[0] - 10, (int)randomPoint1[0] + 10);
             Vector3 randomPoint2 = new Vector3(
                                                     rpx2,
                                                     floorUpperLimits[1],
                                                     (int)randomPoint1[2] + 10
                                                  );
-            target2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            BoxCollider target2Collider = target2.GetComponent<BoxCollider>();
-            target2Collider.isTrigger = true;
-            target2Collider.name = "Target2Collider";
-            target2Collider.enabled = true;
-            target2Collider.size = new Vector3(target2Collider.size.x, 5f, target2Collider.size.z);
-            target2.transform.position = randomPoint2;
-            targets.Add(target2);
-            targetsColliders.Add(target2Collider);
-            target2Position = randomPoint2;
             targetPositions.Add(randomPoint2);
-
-            // --------------------- POINT 3
             int rpx3 = rnd.Next((int)randomPoint2[0] - 10, (int)randomPoint2[0] + 10);
             Vector3 randomPoint3 = new Vector3(
                                                     rpx3,
                                                     floorUpperLimits[1],
                                                     (int)randomPoint2[2] + 10
                                                  );
-            target3 = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            BoxCollider target3Collider = target3.GetComponent<BoxCollider>();
-            target3Collider.isTrigger = true;
-            target3Collider.name = "Target3Collider";
-            target3Collider.enabled = true;
-            target3Collider.size = new Vector3(target3Collider.size.x, 5f, target3Collider.size.z);
-            target3.transform.position = randomPoint3;
-            targets.Add(target3);
-            targetsColliders.Add(target3Collider);
-            target3Position = randomPoint3;
             targetPositions.Add(randomPoint3);
-
-            // --------------------- POINT 4
             int rpx4 = rnd.Next((int)randomPoint3[0] - 3, (int)randomPoint3[0] + 3);
             Vector3 randomPoint4 = new Vector3(
                                                     rpx4,
@@ -417,18 +383,7 @@ public class AgentScript : Agent
                                                     (int)randomPoint3[2] + 10
                                                  );
             target4 = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            BoxCollider target4Collider = target4.GetComponent<BoxCollider>();
-            target4Collider.isTrigger = true;
-            target4Collider.name = "Target4Collider";
-            target4Collider.enabled = true;
-            target4Collider.size = new Vector3(target4Collider.size.x, 5f, target4Collider.size.z);
-            target4.transform.position = randomPoint4;
-            targets.Add(target4);
-            targetsColliders.Add(target4Collider);
-            target4Position = randomPoint4;
             targetPositions.Add(randomPoint4);
-
-            // --------------------- POINT 5
             int rpx5 = rnd.Next((int)randomPoint4[0] - 1, (int)randomPoint4[0] + 1);
             Vector3 randomPoint5 = new Vector3(
                                                     rpx5,
@@ -436,15 +391,6 @@ public class AgentScript : Agent
                                                     (int)randomPoint4[2] + 10
                                                  );
             target5 = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            BoxCollider target5Collider = target5.GetComponent<BoxCollider>();
-            target5Collider.isTrigger = true;
-            target5Collider.name = "Target5Collider";
-            target5Collider.enabled = true;
-            target5Collider.size = new Vector3(target5Collider.size.x, 5f, target5Collider.size.z);
-            target5.transform.position = randomPoint5;
-            targets.Add(target5);
-            targetsColliders.Add(target5Collider);
-            target5Position = randomPoint5;
             targetPositions.Add(randomPoint5);
 
             foreach (var target in targets){
@@ -453,6 +399,18 @@ public class AgentScript : Agent
             }
         }
 
+
+        genTr = gt.GetComponent<GenerateTrack>();
+        if (genTr == null)
+            genTr = gt.AddComponent<GenerateTrack>();
+        genTr.Init(floor, rigid.transform.position);
+
+        gen = gb.GetComponent<GenerateBoxes>();
+        if (gen == null)
+            gen = gb.AddComponent<GenerateBoxes>();
+        gen.Init(floor, genTr.pathPoints, rigid);
+
+        genTr.GeneratePathPoints();
         gen.GenerateBoxesFcn();
 
         // --------------------- RESETS FOR TARGET REACHED STATE
