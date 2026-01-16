@@ -111,8 +111,8 @@ public class AgentScript : Agent
 
                 angles[i] = Vector2.SignedAngle(rigidTransform.forward, point) * Mathf.Deg2Rad;
                 //Debug.Log(angles[1]);
-                Transform targetTransform = targets[i].transform;
-                targetRelativePositions[i] = targetTransform.InverseTransformPoint(rigid.position);
+                // Transform targetTransform = targets[i].transform;
+                // targetRelativePositions[i] = targetTransform.InverseTransformPoint(rigid.position);
             }
 
             RequestDecision();

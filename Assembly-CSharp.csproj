@@ -48,8 +48,8 @@
     <Analyzer Include="/home/alexolaru131/Unity/Hub/Editor/6000.2.6f2/Editor/Data/Tools/Unity.SourceGenerators/Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets/Scripts/UnityToPython.cs" />
     <Compile Include="Assets/Air Resistance 2.0/Scripts/AirResistanceDefaults.cs" />
-    <Compile Include="Assets/Scripts/ToPython.cs" />
     <Compile Include="Assets/Scripts/MPC.cs" />
     <Compile Include="Assets/Scripts/AgentScript.cs" />
     <Compile Include="Assets/Air Resistance 2.0/Scripts/AirResistance.cs" />

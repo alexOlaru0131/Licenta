@@ -212,4 +212,4 @@ def vision_thread(tof_image, ir_image) -> bool:
         print("The robot will go back!")
         return False
 
-    print("Thread finished")
+    # print("Thread finished")
