@@ -118,6 +118,10 @@ void Error_Handler(void);
 #define TMS_GPIO_Port GPIOA
 #define TCK_Pin GPIO_PIN_14
 #define TCK_GPIO_Port GPIOA
+#define HC_Echo_Pin GPIO_PIN_4
+#define HC_Echo_GPIO_Port GPIOB
+#define HC_Trig_Pin GPIO_PIN_9
+#define HC_Trig_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

@@ -45,6 +45,7 @@
 /* Private variables ---------------------------------------------------------*/
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim3;
 
 UART_HandleTypeDef huart4;
 UART_HandleTypeDef huart2;
@@ -63,7 +64,21 @@ const osThreadAttr_t transmitTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
+/* Definitions for readDistanceTas */
+osThreadId_t readDistanceTasHandle;
+const osThreadAttr_t readDistanceTas_attributes = {
+  .name = "readDistanceTas",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for distanceFlag */
+osEventFlagsId_t distanceFlagHandle;
+const osEventFlagsAttr_t distanceFlag_attributes = {
+  .name = "distanceFlag"
+};
 /* USER CODE BEGIN PV */
+
+#define DISTANCE_TOO_CLOSE	(1U << 0)
 
 /* USER CODE END PV */
 
@@ -74,8 +89,10 @@ static void MX_USART2_UART_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_UART4_Init(void);
 static void MX_TIM2_Init(void);
+static void MX_TIM3_Init(void);
 void StartDefaultTask(void *argument);
 void TransmitTask(void *argument);
+void ReadDistanceTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -83,22 +100,6 @@ void TransmitTask(void *argument);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
-typedef struct {
-	uint16_t MOTOR_PIN1;
-	uint16_t MOTOR_PIN2;
-	GPIO_TypeDef* MOTOR_PIN_PORT;
-
-	uint16_t MOTOR_PIN_ENC;
-	GPIO_TypeDef* MOTOR_PIN_ENC_PORT;
-
-	uint16_t MOTOR_PIN_PWM;
-	GPIO_TypeDef* MOTOR_PIN_PWM_PORT;
-
-	uint32_t MOTOR_ROTATIONS;
-} MOTOR;
-
-MOTOR M1, M2, M3, M4;
 
 uint8_t message, timer_counter = 0;
 
@@ -129,6 +130,10 @@ int main(void)
 
   /* USER CODE BEGIN Init */
 
+  CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+  DWT->CYCCNT = 0;
+  DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -144,14 +149,14 @@ int main(void)
   MX_TIM1_Init();
   MX_UART4_Init();
   MX_TIM2_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
+  __HAL_RCC_TIM2_CLK_ENABLE();
 
   CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
   ITM->LAR = 0xC5ACCE55;
   ITM->TCR = ITM_TCR_ITMENA_Msk | ITM_TCR_TSENA_Msk;
   ITM->TER = 1;
-
-  HAL_UART_Receive_IT(&huart4, &message, 1);
 
   /* USER CODE END 2 */
 
@@ -181,9 +186,16 @@ int main(void)
   /* creation of transmitTask */
   transmitTaskHandle = osThreadNew(TransmitTask, NULL, &transmitTask_attributes);
 
+  /* creation of readDistanceTas */
+  readDistanceTasHandle = osThreadNew(ReadDistanceTask, NULL, &readDistanceTas_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
+
+  /* Create the event(s) */
+  /* creation of distanceFlag */
+  distanceFlagHandle = osEventFlagsNew(&distanceFlag_attributes);
 
   /* USER CODE BEGIN RTOS_EVENTS */
   /* add events, ... */
@@ -196,6 +208,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
   while (1)
   {
     /* USER CODE END WHILE */
@@ -367,7 +380,7 @@ static void MX_TIM2_Init(void)
   htim2.Instance = TIM2;
   htim2.Init.Prescaler = 8000-1;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 1000-1;
+  htim2.Init.Period = 1001-1;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
@@ -388,6 +401,51 @@ static void MX_TIM2_Init(void)
   /* USER CODE BEGIN TIM2_Init 2 */
 
   /* USER CODE END TIM2_Init 2 */
+
+}
+
+/**
+  * @brief TIM3 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM3_Init(void)
+{
+
+  /* USER CODE BEGIN TIM3_Init 0 */
+
+  /* USER CODE END TIM3_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM3_Init 1 */
+
+  /* USER CODE END TIM3_Init 1 */
+  htim3.Instance = TIM3;
+  htim3.Init.Prescaler = 79;
+  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim3.Init.Period = 65535;
+  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM3_Init 2 */
+
+  /* USER CODE END TIM3_Init 2 */
 
 }
 
@@ -487,7 +545,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOA, SMPS_EN_Pin|SMPS_V1_Pin|SMPS_SW_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LD4_GPIO_Port, LD4_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, LD4_Pin|HC_Trig_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : B1_Pin */
   GPIO_InitStruct.Pin = B1_Pin;
@@ -523,12 +581,18 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : LD4_Pin */
-  GPIO_InitStruct.Pin = LD4_Pin;
+  /*Configure GPIO pins : LD4_Pin HC_Trig_Pin */
+  GPIO_InitStruct.Pin = LD4_Pin|HC_Trig_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LD4_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : HC_Echo_Pin */
+  GPIO_InitStruct.Pin = HC_Echo_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(HC_Echo_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI1_IRQn, 10, 0);
@@ -547,25 +611,21 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-{
-	if(GPIO_Pin == M1.MOTOR_PIN_ENC)
-	{
-		M1.MOTOR_ROTATIONS ++;
-	}
-	else if(GPIO_Pin == M2.MOTOR_PIN_ENC)
-	{
-		M2.MOTOR_ROTATIONS ++;
-	}
-	else if(GPIO_Pin == M3.MOTOR_PIN_ENC)
-	{
-		M3.MOTOR_ROTATIONS ++;
-	}
-	else if(GPIO_Pin == M4.MOTOR_PIN_ENC)
-	{
-		M4.MOTOR_ROTATIONS ++;
-	}
-}
+typedef struct {
+	uint16_t MOTOR_PIN1;
+	uint16_t MOTOR_PIN2;
+	GPIO_TypeDef* MOTOR_PIN_PORT;
+
+	uint16_t MOTOR_PIN_ENC;
+	GPIO_TypeDef* MOTOR_PIN_ENC_PORT;
+
+	uint16_t MOTOR_PIN_PWM;
+	GPIO_TypeDef* MOTOR_PIN_PWM_PORT;
+
+	uint16_t MOTOR_ROTATIONS;
+} MOTOR;
+
+MOTOR M1, M2, M3, M4;
 
 void InitializeMotorAtts()
 {
@@ -606,12 +666,32 @@ void InitializeMotorAtts()
 	M4.MOTOR_ROTATIONS = 0;
 }
 
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	if(GPIO_Pin == M1.MOTOR_PIN_ENC)
+	{
+		M1.MOTOR_ROTATIONS ++;
+	}
+	else if(GPIO_Pin == M2.MOTOR_PIN_ENC)
+	{
+		M2.MOTOR_ROTATIONS ++;
+	}
+	else if(GPIO_Pin == M3.MOTOR_PIN_ENC)
+	{
+		M3.MOTOR_ROTATIONS ++;
+	}
+	else if(GPIO_Pin == M4.MOTOR_PIN_ENC)
+	{
+		M4.MOTOR_ROTATIONS ++;
+	}
+}
+
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
   if (huart->Instance == UART4)
   {
     HAL_UART_Receive_IT(&huart4, &message, 1);
-    HAL_GPIO_WritePin(LD4_GPIO_Port, LD4_Pin, GPIO_PIN_SET);
+    HAL_GPIO_TogglePin(LD4_GPIO_Port, LD4_Pin);
 
     uint8_t PWM_DC_VAL = 0 |
     		(message & (1 << 1)) |
@@ -720,6 +800,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartDefaultTask */
+
 /**
   * @brief  Function implementing the defaultTask thread.
   * @param  argument: Not used
@@ -730,17 +811,33 @@ void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
 
+	HAL_UART_Receive_IT(&huart4, &message, 1);
+  	__HAL_RCC_TIM2_CLK_ENABLE();
+  	HAL_TIM_Base_Start(&htim2);
 	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
 	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
 	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
 	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_4);
 	InitializeMotorAtts();
 
-  /* Infinite loop */
-  for(;;)
-  {
+	uint32_t cnt;
 
-  }
+  /* Infinite loop */
+	  for(;;)
+	  {
+		  cnt = __HAL_TIM_GET_COUNTER(&htim2);
+
+		  if(cnt >= 999)
+		  {
+			  HAL_GPIO_TogglePin(LD4_GPIO_Port, LD4_Pin);
+			  M1.MOTOR_ROTATIONS = 0;
+			  M2.MOTOR_ROTATIONS = 0;
+			  M3.MOTOR_ROTATIONS = 0;
+			  M4.MOTOR_ROTATIONS = 0;
+		  }
+
+		  osDelay(1);
+	  }
   /* USER CODE END 5 */
 }
 
@@ -755,12 +852,99 @@ void TransmitTask(void *argument)
 {
   /* USER CODE BEGIN TransmitTask */
   /* Infinite loop */
-  for(;;)
-  {
-    HAL_UART_Transmit(&huart4, &M1.MOTOR_ROTATIONS, 2, 10);
-    osDelay(100);
-  }
+	for(;;)
+	{
+		uint32_t flags = osEventFlagsGet(distanceFlagHandle);
+
+		if(flags & DISTANCE_TOO_CLOSE)
+		{
+			char msg[] = "too close\n";
+			HAL_UART_Transmit(&huart4, (uint8_t*)msg, strlen(msg), 10);
+			HAL_GPIO_TogglePin(LD4_GPIO_Port, LD4_Pin);
+		}
+		else {
+			char msg1[] = "start\n";
+			HAL_UART_Transmit(&huart4, (uint8_t*)msg1, strlen(msg1), 10);
+			HAL_UART_Transmit(&huart4, &M1.MOTOR_ROTATIONS, sizeof(uint16_t), 10);
+			HAL_UART_Transmit(&huart4, &M2.MOTOR_ROTATIONS, sizeof(uint16_t), 10);
+			HAL_UART_Transmit(&huart4, &M3.MOTOR_ROTATIONS, sizeof(uint16_t), 10);
+			HAL_UART_Transmit(&huart4, &M4.MOTOR_ROTATIONS, sizeof(uint16_t), 10);
+			char msg2[] = "start\n";
+			HAL_UART_Transmit(&huart4, (uint8_t*)msg2, strlen(msg2), 10);
+			HAL_GPIO_TogglePin(LD4_GPIO_Port, LD4_Pin);
+		}
+
+		osDelay(100);
+	}
   /* USER CODE END TransmitTask */
+}
+
+/* USER CODE BEGIN Header_ReadDistanceTask */
+/**
+* @brief Function implementing the readDistanceTas thread.
+* @param argument: Not used
+* @retval None
+*/
+
+#define CONVERT_TO_DISTANCE(duration) ((float)(duration*0.0343)/2)
+
+typedef struct {
+	uint16_t Echo_Pin;
+	GPIO_TypeDef* Echo_Pin_PORT;
+
+	uint16_t Trig_Pin;
+	GPIO_TypeDef* Trig_Pin_PORT;
+
+	float LAST_DISTANCE_MEASURED;
+} HC_04;
+
+HC_04 sensor = {HC_Echo_Pin, HC_Echo_GPIO_Port, HC_Trig_Pin, HC_Trig_GPIO_Port, 0};
+
+/* USER CODE END Header_ReadDistanceTask */
+void ReadDistanceTask(void *argument)
+{
+  /* USER CODE BEGIN ReadDistanceTask */
+	uint32_t cnt;
+	__HAL_RCC_TIM3_CLK_ENABLE();
+	HAL_TIM_Base_Start(&htim3);
+  /* Infinite loop */
+	for(;;)
+	{
+		HAL_GPIO_WritePin(sensor.Trig_Pin_PORT, sensor.Trig_Pin, GPIO_PIN_RESET);
+		osDelay(2);
+		HAL_GPIO_WritePin(sensor.Trig_Pin_PORT, sensor.Trig_Pin, GPIO_PIN_SET);
+		osDelay(10);
+		HAL_GPIO_WritePin(sensor.Trig_Pin_PORT, sensor.Trig_Pin, GPIO_PIN_RESET);
+		__HAL_TIM_SET_COUNTER(&htim3, 0);
+
+		uint32_t t0 = __HAL_TIM_GET_COUNTER(&htim3);
+		while(HAL_GPIO_ReadPin(sensor.Echo_Pin_PORT, sensor.Echo_Pin) == GPIO_PIN_RESET)
+		{
+			if((__HAL_TIM_GET_COUNTER(&htim3) - t0) > 30000)
+				goto end;
+		}
+
+		__HAL_TIM_SET_COUNTER(&htim3, 0);
+		while(HAL_GPIO_ReadPin(sensor.Echo_Pin_PORT, sensor.Echo_Pin) == GPIO_PIN_SET);
+
+		cnt = __HAL_TIM_GET_COUNTER(&htim3);
+		sensor.LAST_DISTANCE_MEASURED = CONVERT_TO_DISTANCE(cnt);
+
+		if(sensor.LAST_DISTANCE_MEASURED < 20)
+		{
+			osEventFlagsSet(distanceFlagHandle, DISTANCE_TOO_CLOSE);
+		}
+		else
+		{
+			osEventFlagsClear(distanceFlagHandle, DISTANCE_TOO_CLOSE);
+		}
+
+		HAL_GPIO_TogglePin(LD4_GPIO_Port, LD4_Pin);
+
+		end:
+			osDelay(60);
+	}
+  /* USER CODE END ReadDistanceTask */
 }
 
 /**
@@ -781,17 +965,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-  else if (htim->Instance == TIM2) {
-  	  timer_counter++;
-  	  if (timer_counter == 1) {
-  		  M1.MOTOR_ROTATIONS = 0;
-  		  M2.MOTOR_ROTATIONS = 0;
-  		  M3.MOTOR_ROTATIONS = 0;
-  		  M4.MOTOR_ROTATIONS = 0;
 
-  		  timer_counter = 0;
-  	  }
-    }
   /* USER CODE END Callback 1 */
 }
 
