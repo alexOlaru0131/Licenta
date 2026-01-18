@@ -24,6 +24,7 @@
 /* USER CODE BEGIN Includes */
 
 #include "stdio.h"
+#include "string.h"
 
 /* USER CODE END Includes */
 
@@ -855,22 +856,25 @@ void TransmitTask(void *argument)
 	for(;;)
 	{
 		uint32_t flags = osEventFlagsGet(distanceFlagHandle);
+		char msg[100];
 
 		if(flags & DISTANCE_TOO_CLOSE)
 		{
-			char msg[] = "too close\n";
+			strcpy(msg, "too close\n");
 			HAL_UART_Transmit(&huart4, (uint8_t*)msg, strlen(msg), 10);
 			HAL_GPIO_TogglePin(LD4_GPIO_Port, LD4_Pin);
 		}
 		else {
-			char msg1[] = "start\n";
-			HAL_UART_Transmit(&huart4, (uint8_t*)msg1, strlen(msg1), 10);
+			strcpy(msg, "start\n");
+			HAL_UART_Transmit(&huart4, (uint8_t*)msg, strlen(msg), 10);
+
 			HAL_UART_Transmit(&huart4, &M1.MOTOR_ROTATIONS, sizeof(uint16_t), 10);
 			HAL_UART_Transmit(&huart4, &M2.MOTOR_ROTATIONS, sizeof(uint16_t), 10);
 			HAL_UART_Transmit(&huart4, &M3.MOTOR_ROTATIONS, sizeof(uint16_t), 10);
 			HAL_UART_Transmit(&huart4, &M4.MOTOR_ROTATIONS, sizeof(uint16_t), 10);
-			char msg2[] = "start\n";
-			HAL_UART_Transmit(&huart4, (uint8_t*)msg2, strlen(msg2), 10);
+
+			strcpy(msg, "stop\n");
+			HAL_UART_Transmit(&huart4, (uint8_t*)msg, strlen(msg), 10);
 			HAL_GPIO_TogglePin(LD4_GPIO_Port, LD4_Pin);
 		}
 
