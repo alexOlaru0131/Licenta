@@ -1859,14 +1859,14 @@ Camera:
   serializedVersion: 2
   m_ClearFlags: 1
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
-  m_projectionMatrixMode: 1
+  m_projectionMatrixMode: 2
   m_GateFitMode: 2
   m_FOVAxisMode: 0
   m_Iso: 200
-  m_ShutterSpeed: 0.005
+  m_ShutterSpeed: 0.008333334
   m_Aperture: 16
   m_FocusDistance: 10
-  m_FocalLength: 50
+  m_FocalLength: 20.78461
   m_BladeCount: 5
   m_Curvature: {x: 2, y: 11}
   m_BarrelClipping: 0.25
@@ -1879,9 +1879,9 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.3
-  far clip plane: 1000
-  field of view: 60
+  near clip plane: 0.1
+  far clip plane: 4
+  field of view: 60.000004
   orthographic: 0
   orthographic size: 5
   m_Depth: 0
@@ -4148,6 +4148,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6de87d3837b9e8e40ae5c9a9aae08469, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ToPython
+  points:
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
   tofCamera: {fileID: 6627586206479814704}
 --- !u!114 &9207832429460365196
 MonoBehaviour:
@@ -6114,7 +6120,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 11.059999, z: 0}
-  m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
+  m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 4093513023926625255}
@@ -6199,7 +6205,13 @@ MonoBehaviour:
   mpc: {fileID: 6184685588205753100}
   gb: {fileID: 4605228404962459848}
   gt: {fileID: 9181884125820192243}
-  environmentParent: {fileID: 0}
+  utp: {fileID: 1704585865969957000}
+  points:
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
   rigid: {fileID: 4965497976259641221}
   frontRightCol: {fileID: 7770483680842694365}
   frontLeftCol: {fileID: 6860939332513883379}
@@ -6210,11 +6222,6 @@ MonoBehaviour:
   backRightWheel: {fileID: 6569273053416155307}
   backLeftWheel: {fileID: 3226879579647334851}
   drivespeed: 20
-  target1: {fileID: 4694012480429583618}
-  target2: {fileID: 2517525265468380328}
-  target3: {fileID: 9097201200039792665}
-  target4: {fileID: 4751240383425649414}
-  target5: {fileID: 8895259129904584942}
   floor: {fileID: 5437205168030500263}
   floorMaterial: {fileID: 13400000, guid: 43de3455bd37c404e9c62bb5e0ba4339, type: 2}
   lowerCollider: {fileID: 9044499707915534690}

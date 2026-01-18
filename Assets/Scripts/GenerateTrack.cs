@@ -62,10 +62,6 @@ public class GenerateTrack : MonoBehaviour
                 shiftingPos.Add(new Vector2(-1, 0));
                 shiftingPos.Add(new Vector2(0, 1));
                 shiftingPos.Add(new Vector2(0, -1));
-                shiftingPos.Add(new Vector2(1, 1));
-                shiftingPos.Add(new Vector2(1, -1));
-                shiftingPos.Add(new Vector2(-1, 1));
-                shiftingPos.Add(new Vector2(-1, -1));
 
                 int index = 0;
                 int count = 0;
@@ -97,7 +93,7 @@ public class GenerateTrack : MonoBehaviour
                     
                     if(minDistance < 2) break;
                     count ++;
-                    if(count == 10) break;
+                    if(count == 100) break;
                 }
             }
 

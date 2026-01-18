@@ -5,6 +5,8 @@ using Unity.VisualScripting;
 using System.Collections.Generic;
 using System;
 using Newtonsoft.Json.Linq;
+using System.Drawing;
+using Unity.VisualScripting.FullSerializer;
 
 class NewVector2
 {
@@ -27,6 +29,14 @@ public class UnityToPython : MonoBehaviour
     private PointsRpc pointsRpc;
     private DistancesRpc distancesRpc;
     public object scanLock = new object();
+    public List<Vector2> points = new List<Vector2>
+    {
+        new Vector2(0, 0),
+        new Vector2(0, 0),
+        new Vector2(0, 0),
+        new Vector2(0, 0),
+        new Vector2(0, 0)
+    };
 
     int width = 240;
     int height = 180;
@@ -148,7 +158,10 @@ public class UnityToPython : MonoBehaviour
         var pts = pointsRpc.ReturnPoints();
         if(pts != null && pts.Count > 0)
         {
-            Debug.Log(pts[0].y);
+            for(int i = 0 ; i < 5; i++)
+            {
+                points[i] = pts[i].AsVector2();
+            }
         }
         
         Scan();
@@ -176,7 +189,7 @@ public class UnityToPython : MonoBehaviour
                     value += (float)noise;
                 }
 
-                // Debug.DrawRay(ray.origin, ray.direction * maxRange, Color.red, 0.1f);
+                // Debug.DrawRay(ray.origin, ray.direction * maxRange, UnityEngine.Color.red, 0.1f);
 
                 distances[i,j] = value;
             }

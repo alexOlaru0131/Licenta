@@ -70,10 +70,10 @@ public class GenerateBoxes : MonoBehaviour
 
                 foreach (Vector3 targetPos in pathPoints)
                 {
-                    if (System.Math.Abs(expectedPosition[0] - targetPos[0]) < 2.5 &
-                        System.Math.Abs(expectedPosition[0] - targetPos[0]) < 2.5 &&
-                        System.Math.Abs(expectedPosition[2] - targetPos[2]) < 2.5 &&
-                        System.Math.Abs(expectedPosition[2] - targetPos[2]) < 2.5)
+                    if (System.Math.Abs(expectedPosition[0] - targetPos[0]) < 1 &
+                        System.Math.Abs(expectedPosition[0] - targetPos[0]) < 1 &&
+                        System.Math.Abs(expectedPosition[2] - targetPos[2]) < 1 &&
+                        System.Math.Abs(expectedPosition[2] - targetPos[2]) < 1)
                     {
                         canPlace = false;
                     }
