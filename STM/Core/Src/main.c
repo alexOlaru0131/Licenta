@@ -72,6 +72,11 @@ const osThreadAttr_t readDistanceTas_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
+/* Definitions for uartFree */
+osSemaphoreId_t uartFreeHandle;
+const osSemaphoreAttr_t uartFree_attributes = {
+  .name = "uartFree"
+};
 /* Definitions for distanceFlag */
 osEventFlagsId_t distanceFlagHandle;
 const osEventFlagsAttr_t distanceFlag_attributes = {
@@ -167,6 +172,10 @@ int main(void)
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
+
+  /* Create the semaphores(s) */
+  /* creation of uartFree */
+  uartFreeHandle = osSemaphoreNew(1, 1, &uartFree_attributes);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
@@ -424,7 +433,7 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 79;
+  htim3.Init.Prescaler = 0;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim3.Init.Period = 65535;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -596,13 +605,13 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(HC_Echo_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI1_IRQn, 10, 0);
+  HAL_NVIC_SetPriority(EXTI1_IRQn, 6, 0);
   HAL_NVIC_EnableIRQ(EXTI1_IRQn);
 
-  HAL_NVIC_SetPriority(EXTI2_IRQn, 10, 0);
+  HAL_NVIC_SetPriority(EXTI2_IRQn, 6, 0);
   HAL_NVIC_EnableIRQ(EXTI2_IRQn);
 
-  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 10, 0);
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 6, 0);
   HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
@@ -611,6 +620,8 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+uint16_t rotationsM1, rotationsM2, rotationsM3, rotationsM4;
 
 typedef struct {
 	uint16_t MOTOR_PIN1;
@@ -623,7 +634,7 @@ typedef struct {
 	uint16_t MOTOR_PIN_PWM;
 	GPIO_TypeDef* MOTOR_PIN_PWM_PORT;
 
-	uint16_t MOTOR_ROTATIONS;
+	volatile uint16_t MOTOR_ROTATIONS;
 } MOTOR;
 
 MOTOR M1, M2, M3, M4;
@@ -667,23 +678,34 @@ void InitializeMotorAtts()
 	M4.MOTOR_ROTATIONS = 0;
 }
 
+static uint32_t lastTickM1 = 0;
+static uint32_t lastTickM2 = 0;
+static uint32_t lastTickM3 = 0;
+static uint32_t lastTickM4 = 0;
+
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-	if(GPIO_Pin == M1.MOTOR_PIN_ENC)
+	uint32_t now = HAL_GetTick();
+
+	if(GPIO_Pin == M1.MOTOR_PIN_ENC && (now - lastTickM1) > 20)
 	{
 		M1.MOTOR_ROTATIONS ++;
+		lastTickM1 = now;
 	}
-	else if(GPIO_Pin == M2.MOTOR_PIN_ENC)
+	else if(GPIO_Pin == M2.MOTOR_PIN_ENC && (now - lastTickM2) > 20)
 	{
 		M2.MOTOR_ROTATIONS ++;
+		lastTickM2 = now;
 	}
-	else if(GPIO_Pin == M3.MOTOR_PIN_ENC)
+	else if(GPIO_Pin == M3.MOTOR_PIN_ENC && (now - lastTickM3) > 20)
 	{
 		M3.MOTOR_ROTATIONS ++;
+		lastTickM3 = now;
 	}
-	else if(GPIO_Pin == M4.MOTOR_PIN_ENC)
+	else if(GPIO_Pin == M4.MOTOR_PIN_ENC && (now - lastTickM4) > 20)
 	{
 		M4.MOTOR_ROTATIONS ++;
+		lastTickM4 = now;
 	}
 }
 
@@ -691,6 +713,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
   if (huart->Instance == UART4)
   {
+	osSemaphoreAcquire(uartFreeHandle, 1);
     HAL_UART_Receive_IT(&huart4, &message, 1);
     HAL_GPIO_TogglePin(LD4_GPIO_Port, LD4_Pin);
 
@@ -795,6 +818,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 		HAL_GPIO_WritePin(M4.MOTOR_PIN_PORT, M4.MOTOR_PIN2, GPIO_PIN_RESET);
 	}
 
+	osSemaphoreRelease(uartFreeHandle);
+
 }
 }
 
@@ -831,10 +856,11 @@ void StartDefaultTask(void *argument)
 		  if(cnt >= 999)
 		  {
 			  HAL_GPIO_TogglePin(LD4_GPIO_Port, LD4_Pin);
-			  M1.MOTOR_ROTATIONS = 0;
-			  M2.MOTOR_ROTATIONS = 0;
-			  M3.MOTOR_ROTATIONS = 0;
-			  M4.MOTOR_ROTATIONS = 0;
+//			  M1.MOTOR_ROTATIONS = 0;
+//			  M2.MOTOR_ROTATIONS = 0;
+//			  M3.MOTOR_ROTATIONS = 0;
+//			  M4.MOTOR_ROTATIONS = 0;
+			  cnt = 0;
 		  }
 
 		  osDelay(1);
@@ -855,30 +881,43 @@ void TransmitTask(void *argument)
   /* Infinite loop */
 	for(;;)
 	{
+		osSemaphoreAcquire(uartFreeHandle, 10);
+
+		rotationsM1 = M1.MOTOR_ROTATIONS;
+		rotationsM2 = M2.MOTOR_ROTATIONS;
+		rotationsM3 = M3.MOTOR_ROTATIONS;
+		rotationsM4 = M4.MOTOR_ROTATIONS;
+
 		uint32_t flags = osEventFlagsGet(distanceFlagHandle);
 		char msg[100];
 
 		if(flags & DISTANCE_TOO_CLOSE)
 		{
-			strcpy(msg, "too close\n");
-			HAL_UART_Transmit(&huart4, (uint8_t*)msg, strlen(msg), 10);
+			strcpy(msg, "tc");
+			HAL_UART_Transmit(&huart4, msg, strlen(msg), 10);
 			HAL_GPIO_TogglePin(LD4_GPIO_Port, LD4_Pin);
 		}
 		else {
-			strcpy(msg, "start\n");
-			HAL_UART_Transmit(&huart4, (uint8_t*)msg, strlen(msg), 10);
+			uint8_t tx[12];
+			tx[0] = 0xAA;
+			tx[1] = rotationsM1 & 0xFF;
+			tx[2] = (rotationsM1 >> 8) & 0xFF;
+			tx[3] = 0xAA;
+			tx[4] = rotationsM2 & 0xFF;
+			tx[5] = (rotationsM2 >> 8) & 0xFF;
+			tx[6] = 0xAA;
+			tx[7] = rotationsM3 & 0xFF;
+			tx[8] = (rotationsM3 >> 8) & 0xFF;
+			tx[9] = 0xAA;
+			tx[10] = rotationsM3 & 0xFF;
+			tx[11] = (rotationsM3 >> 8) & 0xFF;
+			HAL_UART_Transmit(&huart4, tx, 12, 10);
 
-			HAL_UART_Transmit(&huart4, &M1.MOTOR_ROTATIONS, sizeof(uint16_t), 10);
-			HAL_UART_Transmit(&huart4, &M2.MOTOR_ROTATIONS, sizeof(uint16_t), 10);
-			HAL_UART_Transmit(&huart4, &M3.MOTOR_ROTATIONS, sizeof(uint16_t), 10);
-			HAL_UART_Transmit(&huart4, &M4.MOTOR_ROTATIONS, sizeof(uint16_t), 10);
-
-			strcpy(msg, "stop\n");
-			HAL_UART_Transmit(&huart4, (uint8_t*)msg, strlen(msg), 10);
 			HAL_GPIO_TogglePin(LD4_GPIO_Port, LD4_Pin);
 		}
 
 		osDelay(100);
+		osSemaphoreRelease(uartFreeHandle);
 	}
   /* USER CODE END TransmitTask */
 }
