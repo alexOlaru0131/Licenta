@@ -1,7 +1,5 @@
 # Bachelor Thesis - Autonomous robot with probabilistic trajectory and object avoidance
 
-> THE CODE WILL NOT BE SHOWN ONLY AFTER FINISHING THE BACHELOR DEGREE
-
 <img src="02. Imagini/WhatsApp Image 2025-11-17 at 21.57.48_a81f4383.jpg" alt="Photo from the simulator">
 
 <p align="center">
