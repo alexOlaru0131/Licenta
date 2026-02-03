@@ -1,6 +1,6 @@
 from imports import *
 import vision_process
-import transmit
+import txrx
 import servo
 
 MAX_DISTANCE = 4000
@@ -39,7 +39,7 @@ def main():
     cam.setControl(ac.Control.RANGE, MAX_DISTANCE)
 
     transmit_thread = Process(
-        target=transmit.run,
+        target=txrx.run,
         args=()
     )
     transmit_thread.daemon = True
@@ -169,7 +169,7 @@ def main():
             )[0]
             output = int(output[0])
             # print(f"Action: {output}")
-            transmit.moves.put((output, "wheels"))
+            txrx.moves.put((output, "wheels"))
 
             match output:
                 case 0:

@@ -1,15 +1,34 @@
 from imports import *
 import vision_process
-import transmit
+import txrx
+
+orientation = Queue()
+orientation.put(7)
 
 def run():
-        orientation = 7
+    global orientation
 
-        if vision_process.turn_back_flag.is_set():
-            orientation -= 1
-            orientation = 0 if orientation < 0 else orientation
-            transmit.moves.put((orientation, "servo"))
-            # print(orientation)
+    if vision_process.turn_back_flag.is_set():
+        while not orientation.empty():
+            try:
+                o = orientation.get()
+            except Exception:
+                break
         
-        else:
-            orientation = 7
+        o -= 1
+        if o < 0: o = 0
+
+        txrx.moves.put((o, "servo"))
+        orientation.put(o)
+
+        return True
+    
+    while not orientation.empty():
+        try:
+            o = orientation.get()
+        except Exception:
+            break
+
+    o = 7
+    orientation.put(o)
+    return True

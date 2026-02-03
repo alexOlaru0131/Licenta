@@ -6,6 +6,12 @@ ser = serial.Serial('/dev/ttyAMA0', 115200, timeout=1)
 
 def run():
 	while True:
+		message = 0xAA
+		try:
+			message = ser.read(1)
+		except Exception as e:
+			print(f"{e}")
+
 		move = ()
 		while not moves.empty():
 			try:
@@ -35,7 +41,6 @@ def run():
 						case _: pass
 				
 				case "servo":
-					print("B")
 					command = move[0]
 					code = 0xAB
 					ser.write(bytes([code]))

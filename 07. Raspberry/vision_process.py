@@ -1,5 +1,6 @@
 from imports import *
 import servo
+import txrx
 
 HEIGHT_MEAN_SIZE = 5
 WIDTH_MEAN_SIZE = 5
@@ -138,16 +139,27 @@ def create_track(image) -> bool:
             turn_back_flag.set()
             return False
         
-        # print(mean_map[max_arg[0]][max_arg[1]])
-        if mean_map[max_arg[0]][max_arg[1]] < 1:
-            # servo_thread = Process(
-            #     target=servo.run,
-            #     args=()
-            # )
-            # servo_thread.start()
-            return False
+        else: turn_back_flag.clear()
         
-    turn_back_flag.clear()
+        # print(mean_map[max_arg[0]][max_arg[1]])
+    if mean_map[36 // 2][48 // 2] < 0.5:
+        turn_back_flag.set()
+        servo_thread = Process(
+            target=servo.run,
+            args=()
+        )
+        servo_thread.start()
+        servo_thread.join()
+        return False
+    
+    else:
+        servo_thread = Process(
+            target=servo.run,
+            args=()
+        )
+        servo_thread.start()
+        servo_thread.join()
+        txrx.moves.put((7, "servo"))
 
     n_dist = len(dfs_path) // 5
 
