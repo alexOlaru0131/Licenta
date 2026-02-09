@@ -6,13 +6,6 @@ import servo
 MAX_DISTANCE = 4000
 confidence_value = 30
 
-DISTANCE_ON_STEP_20 = 0.02
-DISTANCE_ON_STEP_40 = 0.04
-DISTANCE_ON_STEP_60 = 0.06
-DISTANCE_ON_STEP_80 = 0.08
-DISTANCE_ON_STEP_100 = 0.1
-ROTATION_ON_STEP = 0.03
-
 def on_confidence_changed(value):
     global confidence_value
     confidence_value = value
@@ -168,19 +161,11 @@ def main():
                 },
             )[0]
             output = int(output[0])
+            active_wheels = 1
+            dc = 1
+            direction = 0
             # print(f"Action: {output}")
-            txrx.moves.put((output, "wheels"))
-
-            match output:
-                case 0:
-                    robot_rotation += ROTATION_ON_STEP
-
-                case 1:
-                    robot_rotation -= ROTATION_ON_STEP
-                
-                case _: pass
-            
-            # print(orientation)
+            txrx.moves.put(("wheels", active_wheels, dc, direction))
 
             cam.releaseFrame(frame)
 

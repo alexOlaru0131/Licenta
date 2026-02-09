@@ -18,7 +18,7 @@ def run():
         o -= 1
         if o < 0: o = 0
 
-        txrx.moves.put((o, "servo"))
+        txrx.moves.put(("servo", o))
         orientation.put(o)
 
         return True

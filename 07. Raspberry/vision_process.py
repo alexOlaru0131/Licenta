@@ -21,7 +21,7 @@ track_map_interpolated = np.zeros(
 mean_map_queue = Queue()
 track_map_queue = Queue()
 
-DISTANCE_MAX_VALUE = 0.2
+DISTANCE_MAX_VALUE = 0.01
 
 turn_back_flag = Event()
 
@@ -142,7 +142,7 @@ def create_track(image) -> bool:
         else: turn_back_flag.clear()
         
         # print(mean_map[max_arg[0]][max_arg[1]])
-    if mean_map[36 // 2][48 // 2] < 0.5:
+    if mean_map[36 // 2][48 // 2] < DISTANCE_MAX_VALUE:
         turn_back_flag.set()
         servo_thread = Process(
             target=servo.run,
@@ -150,6 +150,7 @@ def create_track(image) -> bool:
         )
         servo_thread.start()
         servo_thread.join()
+
         return False
     
     else:
@@ -236,13 +237,13 @@ def vision_thread(tof_image) -> bool:
 
     valid_distance = extract_mean(tof_image)
     if not valid_distance:
-        print("The robot will go back!")
+        print("Mean error! The robot will go back!")
         return False
     mean_map_queue.put(mean_map)
         
     created_track = create_track(mean_map)
     if not created_track:
-        print("The robot will go back!")
+        print("Track error! The robot will go back!")
         return False
     track_map_queue.put(track_map_interpolated)
 
