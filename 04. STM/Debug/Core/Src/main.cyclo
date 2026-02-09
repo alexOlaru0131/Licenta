@@ -11,9 +11,9 @@
 ../Core/Src/main.c:728:6:InitializeServo	1
 ../Core/Src/main.c:734:6:InitializeMotorAtts	1
 ../Core/Src/main.c:780:6:HAL_TIM_IC_CaptureCallback	10
-../Core/Src/main.c:818:6:HAL_UART_RxCpltCallback	20
-../Core/Src/main.c:973:6:StartDefaultTask	2
-../Core/Src/main.c:1003:6:TransmitTask	3
-../Core/Src/main.c:1079:6:ReadDistanceTask	5
-../Core/Src/main.c:1133:6:HAL_TIM_PeriodElapsedCallback	2
-../Core/Src/main.c:1151:6:Error_Handler	1
+../Core/Src/main.c:818:6:HAL_UART_RxCpltCallback	21
+../Core/Src/main.c:969:6:StartDefaultTask	3
+../Core/Src/main.c:1008:6:TransmitTask	3
+../Core/Src/main.c:1080:6:ReadDistanceTask	5
+../Core/Src/main.c:1134:6:HAL_TIM_PeriodElapsedCallback	2
+../Core/Src/main.c:1152:6:Error_Handler	1

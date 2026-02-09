@@ -829,11 +829,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	{
     	HAL_GPIO_TogglePin(LD4_GPIO_Port, LD4_Pin);
 
-    	    M1.MOTOR_ROTATIONS = 0;
-    	    M2.MOTOR_ROTATIONS = 0;
-    	    M3.MOTOR_ROTATIONS = 0;
-    	    M4.MOTOR_ROTATIONS = 0;
-
     	    uint8_t PWM_DC_VAL = 0 |
     	    		(message & (1 << 1)) |
     				(message & (1 << 2)) |
@@ -842,10 +837,11 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
     	    uint16_t pwm_value;
     	    switch(PWM_DC_VAL) {
     			case 0: pwm_value = 0; break;
-    	    	case 1: pwm_value = (uint16_t) 65535 * 0.4; break;
-    	    	case 2: pwm_value = (uint16_t) 65535 * 0.6; break;
-    	    	case 3: pwm_value = (uint16_t) 65535 * 0.8; break;
-    	    	case 4: pwm_value = 65535; break;
+    	    	case 1: pwm_value = (uint16_t) 65535 * 0.2; break;
+    	    	case 2: pwm_value = (uint16_t) 65535 * 0.4; break;
+    	    	case 3: pwm_value = (uint16_t) 65535 * 0.6; break;
+    	    	case 4: pwm_value = (uint16_t) 65535 * 0.8; break;
+    	    	case 5: pwm_value = 65535; break;
     	    	default: break;
     	    }
 
@@ -967,7 +963,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
   * @retval None
   */
 
-static TickType_t last_time = 0;
+static TickType_t last_time1 = 0, last_time2 = 0;
 
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void *argument)
@@ -980,12 +976,21 @@ void StartDefaultTask(void *argument)
 	  for(;;)
 	  {
 
-		  if(xTaskGetTickCount() - last_time >= 1000)
+		  if(xTaskGetTickCount() - last_time1 >= 10)
 		  {
-			  last_time += 1000;
+			  last_time1 += 10;
 			  osEventFlagsSet(passedSecondHandle, PASSED_SECOND);
 
 			  HAL_GPIO_TogglePin(LD4_GPIO_Port, LD4_Pin);
+		  }
+
+		  if(xTaskGetTickCount() - last_time2 >= 1000)
+		  {
+			  last_time2 += 1000;
+	    	  M1.MOTOR_ROTATIONS = 0;
+	    	  M2.MOTOR_ROTATIONS = 0;
+	    	  M3.MOTOR_ROTATIONS = 0;
+	    	  M4.MOTOR_ROTATIONS = 0;
 		  }
 
 		  osDelay(1);
@@ -1040,10 +1045,6 @@ void TransmitTask(void *argument)
 			HAL_UART_Transmit(&huart4, tx, 12, 10);
 
 			osEventFlagsClear(passedSecondHandle, PASSED_SECOND);
-			M1.MOTOR_ROTATIONS = 0;
-			M2.MOTOR_ROTATIONS = 0;
-			M3.MOTOR_ROTATIONS = 0;
-			M4.MOTOR_ROTATIONS = 0;
 
 			HAL_GPIO_TogglePin(LD4_GPIO_Port, LD4_Pin);
 		}
