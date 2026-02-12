@@ -18,16 +18,20 @@ M1_10 = M1;
 M1_100 = M1;
 
 input_M1 = zeros(length(M1_copy), 1);
-input_M1(301:400) = 12 * 0.2;
-input_M1(401:500) = 12 * 0.4;
-input_M1(501:600) = 12 * 0.6;
-input_M1(601:700) = 12 * 0.8;
-input_M1(701:800) = 12;
+input_M1(201:300) = 12 * 0.2;
+input_M1(301:400) = 12 * 0.4;
+input_M1(401:500) = 12 * 0.6;
+input_M1(501:600) = 12 * 0.8;
+input_M1(601:700) = 12;
 input_M1(1401:1500) = 12 * 0.2;
 input_M1(1501:1600) = 12 * 0.4;
 input_M1(1601:1700) = 12 * 0.6;
 input_M1(1701:1800) = 12 * 0.8;
 input_M1(1801:1900) = 12;
+input_M1(2001:2100) = 12 * 0.4;
+input_M1(2101:2200) = 12 * 0.8;
+input_M1(2501:2600) = 12 * 0.4;
+input_M1(2601:2700) = 12 * 0.8;
 
 for i = 10:10:length(M1_10)
     if i <= 10
@@ -59,7 +63,7 @@ for i = 100:100:length(M1_100)
     end
 end
 
-subplot(221), plot(t, [M1_copy M1_10 M1_100 input_M1]), ylim([0 30]), xlim([0 1900])
+subplot(221), plot(t, [M1_copy M1_10 M1_100 input_M1]), ylim([0 40]), xlim([0 2700])
 title("Motor 1"), legend(["Raw", "Rotations [1s]", "Rotations [10s]" "Input signal"])
 
 %
@@ -69,16 +73,20 @@ M2_10 = M2;
 M2_100 = M2;
 
 input_M2 = zeros(length(M2_copy), 1);
-input_M2(301:400) = 12 * 0.2;
-input_M2(401:500) = 12 * 0.4;
-input_M2(501:600) = 12 * 0.6;
-input_M2(601:700) = 12 * 0.8;
-input_M2(701:800) = 12;
+input_M2(201:300) = 12 * 0.2;
+input_M2(301:400) = 12 * 0.4;
+input_M2(401:500) = 12 * 0.6;
+input_M2(501:600) = 12 * 0.8;
+input_M2(601:700) = 12;
 input_M2(1401:1500) = 12 * 0.2;
 input_M2(1501:1600) = 12 * 0.4;
 input_M2(1601:1700) = 12 * 0.6;
 input_M2(1701:1800) = 12 * 0.8;
 input_M2(1801:1900) = 12;
+input_M2(2001:2100) = 12 * 0.4;
+input_M2(2101:2200) = 12 * 0.8;
+input_M2(2501:2600) = 12 * 0.4;
+input_M2(2601:2700) = 12 * 0.8;
 
 for i = 10:10:length(M2_10)
     if i <= 10
@@ -110,7 +118,7 @@ for i = 100:100:length(M2_100)
     end
 end
 
-subplot(222), plot(t, [M2_copy M2_10 M2_100 input_M2]), ylim([0 30]), xlim([0 1900])
+subplot(222), plot(t, [M2_copy M2_10 M2_100 input_M2]), ylim([0 40]), xlim([0 2700])
 title("Motor 2"), legend(["Raw", "Rotations [1s]", "Rotations [10s]" "Input signal"])
 
 %
@@ -120,15 +128,20 @@ M3_10 = M3;
 M3_100 = M3;
 
 input_M3 = zeros(length(M3_copy), 1);
-input_M3(301:400) = 12 * 0.2;
-input_M3(401:500) = 12 * 0.4;
-input_M3(501:600) = 12 * 0.6;
-input_M3(601:700) = 12 * 0.8;
-input_M3(701:800) = 12;
+input_M3(201:300) = 12 * 0.2;
+input_M3(301:400) = 12 * 0.4;
+input_M3(401:500) = 12 * 0.6;
+input_M3(501:600) = 12 * 0.8;
+input_M3(601:700) = 12;
+input_M3(801:900) = 12 * 0.2;
 input_M3(901:1000) = 12 * 0.4;
 input_M3(1001:1100) = 12 * 0.6;
 input_M3(1101:1200) = 12 * 0.8;
 input_M3(1201:1300) = 12;
+input_M3(2001:2100) = 12 * 0.4;
+input_M3(2101:2200) = 12 * 0.8;
+input_M3(2301:2400) = 12 * 0.4;
+input_M3(2401:2500) = 12 * 0.8;
 
 for i = 10:10:length(M3_10)
     if i <= 10
@@ -160,7 +173,7 @@ for i = 100:100:length(M3_100)
     end
 end
 
-subplot(223), plot(t, [M3_copy M3_10 M3_100 input_M3]), ylim([0 30]), xlim([0 1900])
+subplot(223), plot(t, [M3_copy M3_10 M3_100 input_M3]), ylim([0 40]), xlim([0 2700])
 title("Motor 3"), legend(["Raw", "Rotations [1s]", "Rotations [10s]" "Input signal"])
 
 %
@@ -170,15 +183,20 @@ M4_10 = M4;
 M4_100 = M4;
 
 input_M4 = zeros(length(M4_copy), 1);
-input_M4(301:400) = 12 * 0.2;
-input_M4(401:500) = 12 * 0.4;
-input_M4(501:600) = 12 * 0.6;
-input_M4(601:700) = 12 * 0.8;
-input_M4(701:800) = 12;
+input_M4(201:300) = 12 * 0.2;
+input_M4(301:400) = 12 * 0.4;
+input_M4(401:500) = 12 * 0.6;
+input_M4(501:600) = 12 * 0.8;
+input_M4(601:700) = 12;
+input_M4(801:900) = 12 * 0.2;
 input_M4(901:1000) = 12 * 0.4;
 input_M4(1001:1100) = 12 * 0.6;
 input_M4(1101:1200) = 12 * 0.8;
 input_M4(1201:1300) = 12;
+input_M4(2001:2100) = 12 * 0.4;
+input_M4(2101:2200) = 12 * 0.8;
+input_M4(2301:2400) = 12 * 0.4;
+input_M4(2401:2500) = 12 * 0.8;
 
 for i = 10:10:length(M4_10)
     if i <= 10
@@ -210,7 +228,7 @@ for i = 100:100:length(M4_100)
     end
 end
 
-subplot(224), plot(t, [M4_copy M4_10 M4_100 input_M4]), ylim([0 30]), xlim([0 1900])
+subplot(224), plot(t, [M4_copy M4_10 M4_100 input_M4]), ylim([0 40]), xlim([0 2700])
 title("Motor 4"), legend(["Raw", "Rotations [1s]", "Rotations [10s]" "Input signal"])
 
 %%
@@ -233,7 +251,7 @@ title("Motor 4"), legend(["Rotations [1s]", "Rotations [10s]" "Input signal"])
 close all
 clc
 
-figure, hold on, ylim([0 30]), xlim([0 1900])
+figure, hold on, ylim([0 30]), xlim([0 2700])
 M_10 = zeros(size(M1_10));
 M_100 = zeros(size(M1_10));
 
@@ -272,22 +290,23 @@ plot(t, input)
 legend(["M1 Rotations [1s]" "M2 Rotations [1s]" "M3 Rotations [1s]" "M4 Rotations [1s]" "Mean rotations [1s]" "Mean rotations [10s]" "Input signal"])
 
 %% Regulatoare M1/M2
-i1 = 54; i2 = 60; i3 = 62; i4 = 67;
-u0 = mean(input_M1(i1:i2));
-ust = mean(input_M1(i3:i4));
+u0 = 0;
+ust = 1;
 
-y0 = mean(M1_movemean(i1:i2));
-yst = mean(M1_movemean(i3:i4));
+y0 = 0;
+yst = 24;
 
 Kp = (yst - y0)/(ust - u0);
 
-Tp = 0.6;
-Hp_M1_60_80 = tf(Kp, [Tp 1]);
-t = 0:0.01:3;
+y63 = y0 + 0.63*(yst - y0);
 
-H0 = tf(1, [Tp/4 1]);
-HR_M1_60_80 = minreal(H0 / Hp_M1_60_80 / (1 - H0));
+Tp = 0.13;
+Hp= tf(Kp, [Tp 1]);
+Hpd = c2d(Hp, 1, "zoh");
 
-step(feedback(Hp_M1_60_80 * HR_M1_60_80, 1), t)
+Ho = tf(1, [Tp 1]);
+Hod = c2d(Ho, 1, "zoh");
+
+Hrd = minreal(Hod / Hpd / (1 - Hod))
 
 %
