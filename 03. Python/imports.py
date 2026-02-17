@@ -7,13 +7,10 @@ import matplotlib
 matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 
-import onnxruntime
 import random
 import time
 import sys
-import cv2 as cv
 import queue
 from queue import Queue
-import serial
 
 from peaceful_pie.unity_comms import UnityComms

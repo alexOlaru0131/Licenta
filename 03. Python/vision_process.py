@@ -110,9 +110,9 @@ def create_track(image) -> bool:
             check_map[point[0]][point[1]] = 1
             distance = mean_map[point[0]][point[1]]
             distance_plane = np.sqrt(
-                np.pow(max_arg[0] - point[0], 2)
-                + np.pow(max_arg[1] - point[1], 2)
-                + np.pow(mean_map[max_arg[0]][max_arg[1]] - distance, 2)
+                np.power(max_arg[0] - point[0], 2)
+                + np.power(max_arg[1] - point[1], 2)
+                + np.power(mean_map[max_arg[0]][max_arg[1]] - distance, 2)
             )
 
             if distance_plane < min_distance_plane and point[0] >= max_arg[0]:
