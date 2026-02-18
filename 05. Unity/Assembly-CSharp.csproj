@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets/Scripts/UnityToPython.cs" />
+    <Compile Include="Assets/Scripts/Plant.cs" />
     <Compile Include="Assets/Air Resistance 2.0/Scripts/AirResistanceDefaults.cs" />
     <Compile Include="Assets/Scripts/MPC.cs" />
     <Compile Include="Assets/Scripts/AgentScript.cs" />

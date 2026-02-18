@@ -121,8 +121,10 @@ public class AgentScript : Agent
 
     }
 
-    public float motorForce = 50f;
-    public float maxSteerAngle = 30f;
+    [Header("Motor torque")]
+
+    public float motorForce = 0.078f;
+    public float maxSteerAngle = 45f;
 
     public override void OnActionReceived(ActionBuffers actions)
     {
@@ -216,19 +218,15 @@ public class AgentScript : Agent
 
         frontRightCol.GetWorldPose(out Vector3 pos1, out Quaternion rot1);
         frontRightWheel.transform.position = pos1;
-        frontRightWheel.transform.rotation = rot1;
 
         frontLeftCol.GetWorldPose(out Vector3 pos2, out Quaternion rot2);
         frontLeftWheel.transform.position = pos2;
-        frontLeftWheel.transform.rotation = rot2;
 
         backRightCol.GetWorldPose(out Vector3 pos3, out Quaternion rot3);
         backRightWheel.transform.position = pos3;
-        backRightWheel.transform.rotation = rot3;
 
         backLeftCol.GetWorldPose(out Vector3 pos4, out Quaternion rot4);
         backLeftWheel.transform.position = pos4;
-        backLeftWheel.transform.rotation = rot4;
         
         // State state = new State
         // {
@@ -315,7 +313,7 @@ public class AgentScript : Agent
         SetReward(0f);
 
         rigid.transform.position = new Vector3(
-            floorPosition[0], floorPosition[1] + 1, floorPosition[2] - 8
+            floorPosition[0], floorPosition[1] + 0.5f, floorPosition[2] - 8
             );
         rigid.transform.rotation = Quaternion.identity;
         rigid.linearVelocity = Vector3.zero;
