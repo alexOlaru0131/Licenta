@@ -30,8 +30,6 @@ public class AgentScript : Agent
     public GenerateTrack gt;
     private GenerateTrack genTr;
 
-    [Header("Unity to Python")]
-    public UnityToPython utp;
     public List<Vector2> points = new List<Vector2>
     {
         new Vector2(0, 0),
@@ -123,8 +121,20 @@ public class AgentScript : Agent
 
     }
 
+    public float motorForce = 50f;
+    public float maxSteerAngle = 30f;
+
     public override void OnActionReceived(ActionBuffers actions)
     {
+        float steerInput = actions.ContinuousActions[0];
+        float throttleInput = actions.ContinuousActions[1];
+
+        frontLeftCol.steerAngle = maxSteerAngle * steerInput;
+        frontRightCol.steerAngle = maxSteerAngle * steerInput;
+        
+        backLeftCol.motorTorque = motorForce * throttleInput;
+        backRightCol.motorTorque = motorForce * throttleInput;
+
         int discrete = actions.DiscreteActions[0];
         discrete = 1000;
 
@@ -305,7 +315,7 @@ public class AgentScript : Agent
         SetReward(0f);
 
         rigid.transform.position = new Vector3(
-            floorPosition[0], floorUpperLimits[1] + 1, floorPosition[2] - 25
+            floorPosition[0], floorPosition[1] + 1, floorPosition[2] - 8
             );
         rigid.transform.rotation = Quaternion.identity;
         rigid.linearVelocity = Vector3.zero;
@@ -344,9 +354,6 @@ public class AgentScript : Agent
             gen = gb.AddComponent<GenerateBoxes>();
         gen.Init(floor, genTr.pathPoints, rigid);
 
-        if(utp.points != null && utp.points.Count > 0)
-            points = utp.points;
-
         genTr.GeneratePathPoints();
         gen.GenerateBoxesFcn();
 
@@ -366,8 +373,12 @@ public class AgentScript : Agent
 
     public override void Heuristic(in ActionBuffers actionsOut)
     {
-        // for user control
+        var continuousActions = actionsOut.ContinuousActions;
+
+        continuousActions[0] = Input.GetAxisRaw("Horizontal");
+        continuousActions[1] = Input.GetAxisRaw("Vertical");
     }
+
 
     public void OnTriggerEnter(Collider other)
     {
