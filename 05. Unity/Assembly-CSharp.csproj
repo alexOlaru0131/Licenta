@@ -49,12 +49,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets/Scripts/UnityToPython.cs" />
+    <Compile Include="Assets/Scripts/Observations.cs" />
     <Compile Include="Assets/Scripts/Plant.cs" />
+    <Compile Include="Assets/Scripts/ToFComponent.cs" />
     <Compile Include="Assets/Air Resistance 2.0/Scripts/AirResistanceDefaults.cs" />
     <Compile Include="Assets/Scripts/MPC.cs" />
     <Compile Include="Assets/Scripts/AgentScript.cs" />
     <Compile Include="Assets/Air Resistance 2.0/Scripts/AirResistance.cs" />
     <Compile Include="Assets/TutorialInfo/Scripts/Readme.cs" />
+    <Compile Include="Assets/Scripts/TimeOfFlightCamera.cs" />
     <Compile Include="Assets/Scripts/GenerateTrack.cs" />
     <Compile Include="Assets/Scripts/GenerateBoxes.cs" />
     <Compile Include="Assets/Scripts/State.cs" />

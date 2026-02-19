@@ -30,7 +30,7 @@ public class Plant : MonoBehaviour
 
         // TO DO: ADAUGA ESANTIONARE
 
-        Debug.Log("FR: " + wheel1Col.rpm / 60 * 2 * Mathf.PI);
+        // Debug.Log("FR: " + wheel1Col.rpm / 60 * 2 * Mathf.PI);
         // Debug.Log("FL: " + wheel2Col.rpm);
         // Debug.Log("BR: " + wheel3Col.rpm);
         // Debug.Log("BL: " + wheel4Col.rpm);

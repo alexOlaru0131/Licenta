@@ -1,4 +1,7 @@
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography.X509Certificates;
+using Microsoft.VisualBasic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -31,7 +34,7 @@ public class GenerateTrack : MonoBehaviour
         
     }
 
-    public void GeneratePathPoints()
+    public void GeneratePathPoints(int limit)
     {
         System.Random rnd = new System.Random();
         Vector3 floorUpperLimits = floor.bounds.max;
@@ -40,16 +43,16 @@ public class GenerateTrack : MonoBehaviour
 
         pathPoints.Add(startPoint);
 
-        for(int i = 0; i < 9; i++)
+        for(int i = 0; i < limit; i++)
         {
-            int targetX = rnd.Next((int)floor.bounds.min[0], (int)floor.bounds.max[0]);
-            int targetZ = rnd.Next((int)floor.bounds.min[2], (int)floor.bounds.max[2]);
+            int targetX = rnd.Next((int)(floor.bounds.min[0] + 1), (int)(floor.bounds.max[0] - 1));
+            int targetZ = rnd.Next((int)(floor.bounds.min[2] + 1), (int)(floor.bounds.max[2] - 1));
             pathPoints.Add(new Vector3(targetX, 0, targetZ));
         }
 
-        for(int i = 0; i < 10; i++)
+        for(int i = 0; i < limit; i++)
         {
-            for(int k = 0 ; k < 10 ; k++)
+            for(int k = 0 ; k < limit ; k++)
             {
                 if(k == i) continue;
                 Vector3 startPoint = pathPoints[i];
@@ -101,5 +104,17 @@ public class GenerateTrack : MonoBehaviour
 
         // foreach(var point in pathPoints)
         //     Debug.Log(point);
+    }
+
+    public Vector3 TargetCordinates(List<Vector3> pathPoints)
+    {
+        int index = Random.Range(0, pathPoints.Count);
+        return pathPoints[index];
+    }
+
+    public Vector3 StartCordinates(List<Vector3> pathPoints)
+    {
+        int index = Random.Range(0, pathPoints.Count);
+        return pathPoints[index];
     }
 }

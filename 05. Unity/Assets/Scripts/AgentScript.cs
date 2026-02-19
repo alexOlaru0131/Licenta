@@ -20,6 +20,9 @@ public class AgentScript : Agent
     [Header("MPC Script")]
     public MPC mpc;
 
+    [Header("ToF Script")]
+    public TimeOfFlightCamera tof;
+
     [Header("Generate boxes script")]
     [SerializeField]
     public GenerateBoxes gb;
@@ -30,15 +33,6 @@ public class AgentScript : Agent
     public GenerateTrack gt;
     private GenerateTrack genTr;
 
-    public List<Vector2> points = new List<Vector2>
-    {
-        new Vector2(0, 0),
-        new Vector2(0, 0),
-        new Vector2(0, 0),
-        new Vector2(0, 0),
-        new Vector2(0, 0)
-    };
-
     [Header("Car")]
     public Rigidbody rigid;
     private Transform rigidTransform;
@@ -48,13 +42,6 @@ public class AgentScript : Agent
 
     [Header("Wheel Meshes")]
     public Transform frontRightWheel, frontLeftWheel, backRightWheel, backLeftWheel;
-
-    [Header("Parameters")]
-    public float drivespeed;
-
-    bool gotTarget1 = true, gotTarget2 = true, gotTarget3 = true, gotTarget4 = true, gotTarget5 = true;
-    private float[] distances = new float[5];
-    private float[] angles = new float[5];
 
     [Header("Floor")]
     public BoxCollider floor;
@@ -71,10 +58,17 @@ public class AgentScript : Agent
     [Header("Materials")]
     public Material wallMaterial;
 
-    private float timerActions = 0f;
-    public float timerLimit = 1f;
+    [Header("Target")]
+    public GameObject targetBox;
 
-    private void Update()
+    private float timerActions = 0f;
+    public float timerLimit;
+
+    private float[] distance = new float[2];
+    private float angle;
+    private bool gotTarget = true;
+    private int numberOfSteps = 0;
+    private void FixedUpdate()
     {
         System.Random rnd = new System.Random();
         Vector3 agentPosition = rigid.position;
@@ -82,38 +76,42 @@ public class AgentScript : Agent
         double positionOnZ = agentPosition[2];
         agentPosition = rigid.transform.localPosition;
 
-        timerActions += Time.deltaTime;
+        timerActions += Time.fixedDeltaTime;
 
         if (timerActions >= timerLimit)
         {
-            for (int i = 0; i < 5; i++)
-            {
-                distances[i] = (float)System.Math.Sqrt
-                            (
-                                System.Math.Pow(points[i][0] - agentPosition[0], 2) +
-                                System.Math.Pow(points[i][1] - agentPosition[2], 2)
-                            );
-                //Debug.Log(distances[i]);
-                Vector2 point = new Vector2
-                    (
-                    points[i][0] - agentPosition[0],
-                    points[i][1] - agentPosition[2]
-                    );
+            distance[1] = distance[0];
+            distance[0] =  Vector3.Distance(rigid.transform.position, target);
+            // Debug.Log(distance[0]);
+            AddReward((distance[1] - distance[0]) * 0.5f);
 
-                angles[i] = Vector2.SignedAngle(rigidTransform.forward, point) * Mathf.Deg2Rad;
-            }
+            Vector3 dirToTarget = (target - rigid.transform.position).normalized;
+            float alignment = Vector3.Dot(rigidTransform.forward, dirToTarget);
+            angle = Vector3.SignedAngle(
+                rigidTransform.forward,
+                dirToTarget,
+                Vector3.up
+            ) * Mathf.Deg2Rad;
+
+            AddReward(alignment * 0.01f);
 
             RequestDecision();
             timerActions = 0;
+
+            if(distance[0] < 0.5f)
+            {
+                AddReward(5f);
+                gotTarget = true;
+                EndEpisode();
+            }
+
+            if(rigid.transform.position[1] < floor.transform.position[1] - 1) EndEpisode();
+
+            numberOfSteps += 1;
         }
         else
         {
             RequestAction();
-        }
-
-        if (gotTarget1 && gotTarget2 && gotTarget3 && gotTarget4 && gotTarget5)
-        {
-            EndEpisode();
         }
     }
     void Awake()
@@ -121,100 +119,72 @@ public class AgentScript : Agent
 
     }
 
-    [Header("Motor torque")]
+    public void Start()
+    {
+        
+    }
 
-    public float motorForce = 0.078f;
-    public float maxSteerAngle = 45f;
+    // [Header("Motor torque")]
+
+    // public float motorForce;
+    // public float maxSteerAngle;
 
     public override void OnActionReceived(ActionBuffers actions)
     {
-        float steerInput = actions.ContinuousActions[0];
-        float throttleInput = actions.ContinuousActions[1];
+        float motorForce = 1;
+        float maxSteerAngle = 45;
+
+        // float steerInput = actions.ContinuousActions[0];
+        // float throttleInput = actions.ContinuousActions[1];
+
+        int dc = actions.DiscreteActions[0];
+        float throttleInput;
+        switch (dc)
+        {
+            case 0: throttleInput = 0; break;
+            case 1: throttleInput = 0.4f * motorForce; break;
+            case 2: throttleInput = 0.6f * motorForce; break;
+            case 3: throttleInput = 0.8f * motorForce; break;
+            case 4: throttleInput = motorForce; break;
+            default: throttleInput = 0; break;
+        }
+
+        int action = actions.DiscreteActions[1];
+        float steerInput;
+        switch (action)
+        {
+            case 0: steerInput = 0; break;
+            case 1: steerInput = -1; break;
+            case 2: steerInput = 1; break;
+            case 3:
+                {
+                    throttleInput *= -1;
+                    steerInput = 0;
+                    break;
+                }
+            case 4:
+                {
+                    throttleInput *= -1;
+                    steerInput = -1;
+                    break;
+                }
+            case 5:
+                {
+                    throttleInput *= -1;
+                    steerInput = 1;
+                    break;
+                }
+            default: {
+                steerInput = 0;
+                break;
+                }
+        }
 
         frontLeftCol.steerAngle = maxSteerAngle * steerInput;
         frontRightCol.steerAngle = maxSteerAngle * steerInput;
         
         backLeftCol.motorTorque = motorForce * throttleInput;
         backRightCol.motorTorque = motorForce * throttleInput;
-
-        int discrete = actions.DiscreteActions[0];
-        discrete = 1000;
-
-        switch (discrete)
-        {
-        case 0:
-            {
-                rigid.linearVelocity = new Vector3(
-                                (float)(rigid.linearVelocity[0] * 0.9),
-                                (float)(rigid.linearVelocity[1] * 0.9),
-                                (float)(rigid.linearVelocity[2] * 0.9)
-                                );
-                rigid.transform.rotation = new Quaternion(rigid.transform.rotation[0],
-                                                    (float)(rigid.transform.rotation[1] + 0.03),
-                                                    rigid.transform.rotation[2],
-                                                    rigid.transform.rotation[3]);
-                break;
-            }
-
-        case 1:
-        {
-                rigid.linearVelocity = new Vector3(
-                            (float)(rigid.linearVelocity[0] * 0.9),
-                            (float)(rigid.linearVelocity[1] * 0.9),
-                            (float)(rigid.linearVelocity[2] * 0.9)
-                            );
-                rigid.transform.rotation = new Quaternion(rigid.transform.rotation[0],
-                                                    (float)(rigid.transform.rotation[1] - 0.03),
-                                                    rigid.transform.rotation[2],
-                                                    rigid.transform.rotation[3]);
-                break;
-            }
-
-        case 2:
-            {
-                frontRightCol.motorTorque = (int)(drivespeed / 10 * 2);
-                backRightCol.motorTorque = (int)(drivespeed / 10 * 2);
-                frontLeftCol.motorTorque = (int)(drivespeed / 10 * 2);
-                backLeftCol.motorTorque = (int)(drivespeed / 10 * 2);
-                break;
-            }
-
-        case 3:
-            {
-                frontRightCol.motorTorque = (int)drivespeed / 10 * 4;
-                backRightCol.motorTorque = (int)drivespeed / 10 * 4;
-                frontLeftCol.motorTorque = (int)drivespeed / 10 * 4;
-                backLeftCol.motorTorque = (int)drivespeed / 10 * 4;
-                break;
-            }
-
-        case 4:
-            {
-                frontRightCol.motorTorque = (int)(drivespeed / 10 * 6);
-                backRightCol.motorTorque = (int)(drivespeed / 10 * 6);
-                frontLeftCol.motorTorque = (int)(drivespeed / 10 * 6);
-                backLeftCol.motorTorque = (int)(drivespeed / 10 * 6);
-                break;
-            }
-
-        case 5:
-            {
-                frontRightCol.motorTorque = (int)(drivespeed / 10 * 8);
-                backRightCol.motorTorque = (int)(drivespeed / 10 * 8);
-                frontLeftCol.motorTorque = (int)(drivespeed / 10 * 8);
-                backLeftCol.motorTorque = (int)(drivespeed / 10 * 8);
-                break;
-            }
-
-        case 6:
-            {
-                frontRightCol.motorTorque = drivespeed;
-                backRightCol.motorTorque = drivespeed;
-                frontLeftCol.motorTorque = drivespeed;
-                backLeftCol.motorTorque = drivespeed;
-                break;
-            }
-        }
 
         frontRightCol.GetWorldPose(out Vector3 pos1, out Quaternion rot1);
         frontRightWheel.transform.position = pos1;
@@ -227,104 +197,56 @@ public class AgentScript : Agent
 
         backLeftCol.GetWorldPose(out Vector3 pos4, out Quaternion rot4);
         backLeftWheel.transform.position = pos4;
-        
-        // State state = new State
-        // {
-        //     pos1x = target1Position[0],
-        //     pos1z = target1Position[2],
-        //     pos2x = target2Position[0],
-        //     pos2z = target2Position[2],
-        //     pos3x = target3Position[0],
-        //     pos3z = target3Position[2],
-        //     pos4x = target4Position[0],
-        //     pos4z = target4Position[2],
-        //     pos5x = target5Position[0],
-        //     pos5z = target5Position[2],
-        //     distance1 = distances[0],
-        //     distance2 = distances[1],
-        //     distance3 = distances[2],
-        //     distance4 = distances[3],
-        //     distance5 = distances[4],
-        //     angle1 = angles[0],
-        //     angle2 = angles[1],
-        //     angle3 = angles[2],
-        //     angle4 = angles[3],
-        //     angle5 = angles[4],
-        //     got1 = gotTarget1,
-        //     got2 = gotTarget2,
-        //     got3 = gotTarget3,
-        //     got4 = gotTarget4,
-        //     got5 = gotTarget5,
-        //     staticFrictionCoef = staticFrictionCoef,
-        //     dynamicFrictionCoef = dynamicFrictionCoef,
-        //     robotX = rigid.transform.position[0],
-        //     robotZ = rigid.transform.position[2],
-        //     robotRotation = rigid.rotation.eulerAngles.y * Mathf.Deg2Rad,
-        // };
-
-        // mpc.MPC_func(state, discrete);
-
     }
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        foreach (Vector2 point in points)
+        sensor.AddObservation((target[0] - rigid.transform.position[0])/10f);
+        sensor.AddObservation((target[2] - rigid.transform.position[2])/10f);
+        sensor.AddObservation(distance[0]/10f);
+        sensor.AddObservation(angle);
+
+        float maxRange = 4.0f;
+        for(int j = 0 ;j < 48; j++)
         {
-            sensor.AddObservation(point[0]);
-            sensor.AddObservation(point[1]);
-            //Debug.Log(pos[0] + " " + pos[2]);
+
+            float dist = Mathf.Clamp01(tof.distances[18,j] / maxRange);
+            if(tof.distances[18,j] == 0) sensor.AddObservation(1);
+            else sensor.AddObservation(dist);
         }
-
-        foreach (var distance in distances)
-        {
-            sensor.AddObservation(distance);
-        }
-
-        foreach (var angle in angles)
-        {
-            sensor.AddObservation(angle);
-        }
-
-        sensor.AddObservation(gotTarget1);
-        sensor.AddObservation(gotTarget2);
-        sensor.AddObservation(gotTarget3);
-        sensor.AddObservation(gotTarget4);
-        sensor.AddObservation(gotTarget5);
-        sensor.AddObservation(staticFrictionCoef);
-        sensor.AddObservation(dynamicFrictionCoef);
-
-        //Debug.Log(sensor.ObservationSize());
     }
 
+
+    [HideInInspector]
+    public Vector3 target;
+    Vector3 startPosition;
     public override void OnEpisodeBegin()
     {
         System.Random rnd = new System.Random();
+        // floor.transform.localScale = new Vector3(numberOfSteps / 100000 + 5, 0.1f, numberOfSteps / 100000 + 5);
         Vector3 floorUpperLimits = floor.bounds.max;
         Vector3 floorLowerLimits = floor.bounds.min;
         Vector3 floorPosition = floor.transform.position;
+        
         lowerCollider.name = "Lower collider";
         upperCollider.name = "Upper collider";
         leftCollider.name = "Left collider";
         rightCollider.name = "Right collider";
         rigidTransform = rigid.transform;
 
-        mpc.mpcLine.positionCount = 0;
+        genTr = gt.GetComponent<GenerateTrack>();
+        if (genTr == null)
+            genTr = gt.AddComponent<GenerateTrack>();
+        genTr.Init(floor, rigid.transform.position);
+
+        gen = gb.GetComponent<GenerateBoxes>();
+        if (gen == null)
+            gen = gb.AddComponent<GenerateBoxes>();
+        gen.Init(floor, genTr.pathPoints, rigid);
 
         SetReward(0f);
 
-        rigid.transform.position = new Vector3(
-            floorPosition[0], floorPosition[1] + 0.5f, floorPosition[2] - 8
-            );
-        rigid.transform.rotation = Quaternion.identity;
-        rigid.linearVelocity = Vector3.zero;
-
-        if (gotTarget1 && gotTarget2 && gotTarget3 && gotTarget4 && gotTarget5)
-        {
-            staticFrictionCoef = (float)rnd.NextDouble() / 2;
-            dynamicFrictionCoef = (float)rnd.NextDouble() / 2;
-
-            floorMaterial.dynamicFriction = dynamicFrictionCoef;
-            floorMaterial.staticFriction = staticFrictionCoef;
+        if (gotTarget){
 
             floor.material = floorMaterial;
 
@@ -339,34 +261,27 @@ public class AgentScript : Agent
                 Destroy(col);
             }
             gb.wallBoxColList.Clear();
+
+            genTr.pathPoints.Clear();
+
+            genTr.GeneratePathPoints(numberOfSteps / 100000 + 2);
+            // gen.GenerateBoxesFcn();
+            target = genTr.TargetCordinates(genTr.pathPoints);
+            target[1] = floorPosition[1];
+            targetBox.transform.position = target;
+            // Debug.Log(target);
+
+            gotTarget = false;
+
+            startPosition = genTr.StartCordinates(genTr.pathPoints);
+            startPosition[1] = floorPosition[1] + 0.5f;
+            // Debug.Log(startPosition);
+            // Debug.Log(Vector3.Distance(rigid.transform.position, target));
         }
 
-
-        genTr = gt.GetComponent<GenerateTrack>();
-        if (genTr == null)
-            genTr = gt.AddComponent<GenerateTrack>();
-        genTr.Init(floor, rigid.transform.position);
-
-        gen = gb.GetComponent<GenerateBoxes>();
-        if (gen == null)
-            gen = gb.AddComponent<GenerateBoxes>();
-        gen.Init(floor, genTr.pathPoints, rigid);
-
-        genTr.GeneratePathPoints();
-        gen.GenerateBoxesFcn();
-
-        // --------------------- RESETS FOR TARGET REACHED STATE
-        gotTarget1 = false;
-        gotTarget2 = false;
-        gotTarget3 = false;
-        gotTarget4 = false;
-        gotTarget5 = false;
-
-        mpc.drawnMPC1 = false;
-        mpc.drawnMPC2 = false;
-        mpc.drawnMPC3 = false;
-        mpc.drawnMPC4 = false;
-        mpc.drawnMPC5 = false;
+        rigid.transform.position = startPosition;
+        rigid.transform.rotation = Quaternion.LookRotation(target - startPosition);
+        rigid.linearVelocity = Vector3.zero;
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)
@@ -386,31 +301,6 @@ public class AgentScript : Agent
             case ("wallbox"):
                 floor.GetComponent<Renderer>().material.color = Color.red;
                 EndEpisode();
-                break;
-
-            case ("Target1Collider"):
-                AddReward(1f);
-                gotTarget1 = true;
-                break;
-
-            case ("Target2Collider"):
-                AddReward(1f);
-                gotTarget2 = true;
-                break;
-
-            case ("Target3Collider"):
-                AddReward(1f);
-                gotTarget3 = true;
-                break;
-
-            case ("Target4Collider"):
-                AddReward(1f);
-                gotTarget4 = true;
-                break;
-
-            case ("Target5Collider"):
-                AddReward(1f);
-                gotTarget5 = true;
                 break;
 
             case ("Lower collider"):

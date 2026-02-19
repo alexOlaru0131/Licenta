@@ -1,0 +1,42 @@
+{
+    "name": "root",
+    "metadata": {
+        "timer_format_version": "0.1.0",
+        "start_time_seconds": "1771513910",
+        "python_version": "3.10.12 (main, Feb 14 2026, 10:31:28) [GCC 15.2.1 20260123 (Red Hat 15.2.1-7)]",
+        "command_line_arguments": "/home/alexolaru131/.pyenv/versions/unity-rl-env/bin/mlagents-learn --force --run-id=Training",
+        "mlagents_version": "1.1.0",
+        "mlagents_envs_version": "1.1.0",
+        "communication_protocol_version": "1.5.0",
+        "pytorch_version": "2.10.0+cu128",
+        "numpy_version": "1.23.5",
+        "end_time_seconds": "1771513921"
+    },
+    "total": 11.522977003000051,
+    "count": 1,
+    "self": 0.004630278001059196,
+    "children": {
+        "run_training.setup": {
+            "total": 0.01696118200015917,
+            "count": 1,
+            "self": 0.01696118200015917
+        },
+        "TrainerController.start_learning": {
+            "total": 11.501385542998833,
+            "count": 1,
+            "self": 5.169699761609081e-05,
+            "children": {
+                "TrainerController._reset_env": {
+                    "total": 11.501230533000125,
+                    "count": 1,
+                    "self": 11.501230533000125
+                },
+                "TrainerController._save_models": {
+                    "total": 0.00010331300109100994,
+                    "count": 1,
+                    "self": 0.00010331300109100994
+                }
+            }
+        }
+    }
+}
