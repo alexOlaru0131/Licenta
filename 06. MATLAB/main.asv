@@ -304,18 +304,17 @@ for i = 100:100:length(omega)
     end
 end
 
-max(omega_mean);
+max(omega_mean)
 
 figure, plot(t, [M1 M1_second omega omega_mean]), ylim([0 35]), xlim([0 3100])
 title("Motor 1"), legend(["Pulses [100 ms]", "Mean pulses [1s]", "rad/sec", "Mean rad/sec [10 sec]"])
 
-K_M1 = (max(omega*4) - 0) / (1 - 0);
-y63 = 0 + 0.63 * (max(omega*4) - 0);
+K_M1 = (max(omega_mean) - 0) / (1 - 0);
+y63 = 0 + 0.63 * (max(omega_mean) - 0);
 T_M1 = 0.06;
 H_M1 = tf(K_M1, [T_M1 1]);
 H0_M1 = tf(1, [0.1 1]);
-HR_M1 = minreal(H0_M1 / H_M1 / (1 - H0_M1));
-HR_M1_d = c2d(HR_M1, 0.1, 'tustin')
+
 
 %%
 close all
