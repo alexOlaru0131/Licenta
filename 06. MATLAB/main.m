@@ -304,7 +304,7 @@ for i = 100:100:length(omega)
     end
 end
 
-max(omega_mean);
+max(omega_mean)
 
 figure, plot(t, [M1 M1_second omega omega_mean]), ylim([0 35]), xlim([0 3100])
 title("Motor 1"), legend(["Pulses [100 ms]", "Mean pulses [1s]", "rad/sec", "Mean rad/sec [10 sec]"])
@@ -315,51 +315,151 @@ T_M1 = 0.06;
 H_M1 = tf(K_M1, [T_M1 1]);
 H0_M1 = tf(1, [0.1 1]);
 HR_M1 = minreal(H0_M1 / H_M1 / (1 - H0_M1));
-HR_M1_d = c2d(HR_M1, 0.1, 'tustin')
+HR_M1_d = c2d(HR_M1, 0.1, 'tustin');
 
 %%
 close all
 clc
-figure, plot(t, [M2_10 M2_100 input_M2]), ylim([0 30]), xlim([0 2900])
-title("Motor 2"), legend(["Raw", "Mean pulses [1s]", "Mean pulses [10s]", "Input signal"])
-max(M2_100) * 1 / 42.6918
-(max(M1_100) * 1 / 42.6918) / (max(M2_100) * 1 / 42.6918)
 
+omega_mean = M2;
+
+for i = 10:10:length(omega)
+    if i <= 10
+        omega(1 : 10) = sum(M2(1 : 10)) / 4;
+        i = i + 1;
+    else
+        if input_M2(i - 10 + 1 : i - 1) == 0
+            omega(i - 10 : i) = 0;
+        elseif mean(M2(i - 10 : i)) > 30
+            omega(i - 10 : i) = 0;
+        else
+            omega(i - 10 : i) = sum(M2(i - 10 : i)) / 4;
+        end
+    end
+end
+
+for i = 100:100:length(omega)
+    if i <= 100
+        omega_mean(1 : 100) = mean(omega(1 : 100));
+        i = i + 1;
+    else
+        if input_M2(i - 100 + 1 : i - 1) == 0
+            omega_mean(i - 100 : i) = 0;
+        elseif mean(M2(i - 100 : i)) > 30
+            omega_mean(i - 0 : i) = 0;
+        else
+            omega_mean(i - 100 : i) = mean(omega(i - 100 : i));
+        end
+    end
+end
+
+max(omega_mean)
+
+figure, plot(t, [M2 M2_second omega omega_mean]), ylim([0 35]), xlim([0 3100])
+title("Motor 1"), legend(["Pulses [100 ms]", "Mean pulses [1s]", "rad/sec", "Mean rad/sec [10 sec]"])
+
+K_M2 = (max(omega*4) - 0) / (1 - 0);
+y63 = 0 + 0.63 * (max(omega*4) - 0);
+T_M2 = 0.06;
+H_M2 = tf(K_M2, [T_M2 1]);
+H0_M2 = tf(1, [0.1 1]);
+HR_M2 = minreal(H0_M2 / H_M2 / (1 - H0_M2));
+HR_M2_d = c2d(HR_M2, 0.1, 'tustin');
 %%
 close all
 clc
-figure, plot(t, [M3_10 M3_100 input_M3]), ylim([0 30]), xlim([0 2900])
-title("Motor 3"), legend(["Raw", "Mean pulses [1s]", "Mean pulses [10s]", "Input signal"])
-max(M3_100) * 1 / 42.6918
 
+omega_mean = M3;
+
+for i = 10:10:length(omega)
+    if i <= 10
+        omega(1 : 10) = sum(M3(1 : 10)) / 4;
+        i = i + 1;
+    else
+        if input_M3(i - 10 + 1 : i - 1) == 0
+            omega(i - 10 : i) = 0;
+        elseif mean(M3(i - 10 : i)) > 30
+            omega(i - 10 : i) = 0;
+        else
+            omega(i - 10 : i) = sum(M3(i - 10 : i)) / 4;
+        end
+    end
+end
+
+for i = 100:100:length(omega)
+    if i <= 100
+        omega_mean(1 : 100) = mean(omega(1 : 100));
+        i = i + 1;
+    else
+        if input_M3(i - 100 + 1 : i - 1) == 0
+            omega_mean(i - 100 : i) = 0;
+        elseif mean(M3(i - 100 : i)) > 30
+            omega_mean(i - 0 : i) = 0;
+        else
+            omega_mean(i - 100 : i) = mean(omega(i - 100 : i));
+        end
+    end
+end
+
+max(omega_mean)
+
+figure, plot(t, [M3 M3_second omega omega_mean]), ylim([0 35]), xlim([0 3100])
+title("Motor 1"), legend(["Pulses [100 ms]", "Mean pulses [1s]", "rad/sec", "Mean rad/sec [10 sec]"])
+
+K_M3 = (max(omega*4) - 0) / (1 - 0);
+y63 = 0 + 0.63 * (max(omega*4) - 0);
+T_M3 = 0.06;
+H_M3 = tf(K_M3, [T_M3 1]);
+H0_M3 = tf(1, [0.1 1]);
+HR_M3 = minreal(H0_M3 / H_M3 / (1 - H0_M3));
+HR_M3_d = c2d(HR_M3, 0.1, 'tustin');
 %%
 close all
 clc
-figure, plot(t, [M4_10 M4_100 input_M4]), ylim([0 30]), xlim([0 2900])
-title("Motor 4"), legend(["Raw", "Mean pulses [1s]", "Mean pulses [10s]", "Input signal"])
-max(M4_100) * 1 / 42.6918
-(max(M3_100) * 1 / 42.6918) / (max(M4_100) * 1 / 42.6918)
 
-%% Regulator
-clc
+omega_mean = M4;
 
-u0 = 0;
-ust = 1;
+for i = 10:10:length(omega)
+    if i <= 10
+        omega(1 : 10) = sum(M4(1 : 10)) / 4;
+        i = i + 1;
+    else
+        if input_M4(i - 10 + 1 : i - 1) == 0
+            omega(i - 10 : i) = 0;
+        elseif mean(M4(i - 10 : i)) > 30
+            omega(i - 10 : i) = 0;
+        else
+            omega(i - 10 : i) = sum(M4(i - 10 : i)) / 4;
+        end
+    end
+end
 
-y0 = 0;
-yst = 42.69;
+for i = 100:100:length(omega)
+    if i <= 100
+        omega_mean(1 : 100) = mean(omega(1 : 100));
+        i = i + 1;
+    else
+        if input_M4(i - 100 + 1 : i - 1) == 0
+            omega_mean(i - 100 : i) = 0;
+        elseif mean(M4(i - 100 : i)) > 30
+            omega_mean(i - 0 : i) = 0;
+        else
+            omega_mean(i - 100 : i) = mean(omega(i - 100 : i));
+        end
+    end
+end
 
-Kp = (yst - y0)/(ust - u0);
+max(omega_mean)
 
-y63 = y0 + 0.63*(yst - y0);
+figure, plot(t, [M4 M4_second omega omega_mean]), ylim([0 35]), xlim([0 3100])
+title("Motor 1"), legend(["Pulses [100 ms]", "Mean pulses [1s]", "rad/sec", "Mean rad/sec [10 sec]"])
 
-Tp = 0.18;
-Hp= tf(Kp, [Tp 1]);
-Hpd = c2d(Hp, Tp, "zoh");
+%%
 
-Ho = tf(1, [Tp 1]);
-Hod = c2d(Ho, Tp, "zoh");
-
-Hrd = minreal(Hod / Hpd / (1 - Hod))
-
-%
+K_M4 = (31.21 - 0) / (1 - 0);
+y63 = 0 + 0.63 * (31.21 - 0);
+T_M4 = 0.078;
+H_M4 = tf(K_M4, [T_M4 1]);
+H0_M4 = tf(1, [0.4 1]);
+HR_M4 = minreal(H0_M4 / H_M4 / (1 - H0_M4));
+HR_M4_d = c2d(HR_M4, 0.1, 'tustin')
