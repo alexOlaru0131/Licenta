@@ -35,12 +35,6 @@ def main():
         # print(f"Got here 1 {path_index} {vision_thread.is_alive()}")
         vision_thread.join()
 
-        transmission_thread = Thread(
-            target=transmission.transmission_thread,
-        )
-        transmission_thread.daemon = True
-        transmission_thread.start()
-
         if not vision_process.turn_back_flag.is_set():
 
             plt.subplot(2, 3, 1)
