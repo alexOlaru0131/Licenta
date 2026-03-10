@@ -1,7 +1,6 @@
 from imports import *
 
 class RenderCallback(BaseCallback):
-
     def __init__(self, render_freq=50):
         super().__init__()
         self.render_freq = render_freq
