@@ -1,11 +1,5 @@
 %%
 clc
-clear all
-close all
-%
-
-%%
-clc
 close all
 clear all
 
@@ -308,15 +302,6 @@ max(omega_mean)
 
 figure, plot(t, [M1 M1_second omega omega_mean]), ylim([0 35]), xlim([0 3100])
 title("Motor 1"), legend(["Pulses [100 ms]", "Mean pulses [1s]", "rad/sec", "Mean rad/sec [10 sec]"])
-
-K_M1 = (max(omega*4) - 0) / (1 - 0);
-y63 = 0 + 0.63 * (max(omega*4) - 0);
-T_M1 = 0.06;
-H_M1 = tf(K_M1, [T_M1 1]);
-H0_M1 = tf(1, [0.1 1]);
-HR_M1 = minreal(H0_M1 / H_M1 / (1 - H0_M1));
-HR_M1_d = c2d(HR_M1, 0.1, 'tustin');
-
 %%
 close all
 clc
@@ -352,19 +337,6 @@ for i = 100:100:length(omega)
         end
     end
 end
-
-max(omega_mean)
-
-figure, plot(t, [M2 M2_second omega omega_mean]), ylim([0 35]), xlim([0 3100])
-title("Motor 1"), legend(["Pulses [100 ms]", "Mean pulses [1s]", "rad/sec", "Mean rad/sec [10 sec]"])
-
-K_M2 = (max(omega*4) - 0) / (1 - 0);
-y63 = 0 + 0.63 * (max(omega*4) - 0);
-T_M2 = 0.06;
-H_M2 = tf(K_M2, [T_M2 1]);
-H0_M2 = tf(1, [0.1 1]);
-HR_M2 = minreal(H0_M2 / H_M2 / (1 - H0_M2));
-HR_M2_d = c2d(HR_M2, 0.1, 'tustin');
 %%
 close all
 clc
@@ -400,19 +372,6 @@ for i = 100:100:length(omega)
         end
     end
 end
-
-max(omega_mean)
-
-figure, plot(t, [M3 M3_second omega omega_mean]), ylim([0 35]), xlim([0 3100])
-title("Motor 1"), legend(["Pulses [100 ms]", "Mean pulses [1s]", "rad/sec", "Mean rad/sec [10 sec]"])
-
-K_M3 = (max(omega*4) - 0) / (1 - 0);
-y63 = 0 + 0.63 * (max(omega*4) - 0);
-T_M3 = 0.06;
-H_M3 = tf(K_M3, [T_M3 1]);
-H0_M3 = tf(1, [0.1 1]);
-HR_M3 = minreal(H0_M3 / H_M3 / (1 - H0_M3));
-HR_M3_d = c2d(HR_M3, 0.1, 'tustin');
 %%
 close all
 clc
@@ -463,3 +422,6 @@ H_M4 = tf(K_M4, [T_M4 1]);
 H0_M4 = tf(1, [0.4 1]);
 HR_M4 = minreal(H0_M4 / H_M4 / (1 - H0_M4));
 HR_M4_d = c2d(HR_M4, 0.1, 'tustin')
+
+%%
+
